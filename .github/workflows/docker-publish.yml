@@ -52,8 +52,9 @@ jobs:
 
       - name: Check Environment Variables and Secrets
         run: |
-          echo "DOCKER_HUB_REPO is $DOCKER_HUB_REPO"
+          echo "DOCKER_HUB_REPO is ${{ env.DOCKER_HUB_REPO }}"
           echo "DOCKER_HUB_REGISTRY is ${{ secrets.DOCKER_HUB_REGISTRY }}"
+          echo "DOCKER_HUB_REGISTRY is ${{ secrets.NOTHING }}"
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
