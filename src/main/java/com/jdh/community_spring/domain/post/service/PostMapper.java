@@ -1,7 +1,7 @@
-package com.jdh.community_spring.domain.posts.service;
+package com.jdh.community_spring.domain.post.service;
 
-import com.jdh.community_spring.domain.posts.domain.Post;
-import com.jdh.community_spring.domain.posts.dto.PostCreateDto;
+import com.jdh.community_spring.domain.post.domain.Post;
+import com.jdh.community_spring.domain.post.dto.PostCreateDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

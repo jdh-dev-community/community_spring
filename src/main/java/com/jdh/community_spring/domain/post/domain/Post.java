@@ -1,17 +1,19 @@
-package com.jdh.community_spring.domain.posts.domain;
+package com.jdh.community_spring.domain.post.domain;
 
+import com.jdh.community_spring.common.domain.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Post extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,15 +39,13 @@ public class Post {
   @Column(name = "view_count")
   private int viewCount;
 
-  @Column(name = "created_at")
-  private LocalDateTime createdAt;
 
 
   public Post (String title, String textContent, String creator, String category) {
-    title = title;
-    textContent = textContent;
-    creator = creator;
-    category = category;
+    this.title = title;
+    this.textContent = textContent;
+    this.creator = creator;
+    this.category = category;
   }
 
 }
