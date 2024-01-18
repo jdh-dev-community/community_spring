@@ -1,4 +1,4 @@
-package com.jdh.community_spring.domain.posts.dto;
+package com.jdh.community_spring.domain.post.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
