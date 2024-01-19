@@ -8,8 +8,8 @@ name: Docker
 on:
   push:
     branches:
-      # - dev
-      - init-cicd
+      - dev
+      
 
 jobs:
   build:
