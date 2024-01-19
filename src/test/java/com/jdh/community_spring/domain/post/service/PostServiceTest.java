@@ -75,7 +75,7 @@ public class PostServiceTest {
     @Test
     public void Pageable이Null인경우는InvalidInputException발생한다() {
       Pageable pageable = null;
-      assertThrows(InvalidInputException.class, () -> postService.getPostList(pageable));
+      assertThrows(IllegalArgumentException.class, () -> postService.getPostList(pageable));
     }
 
     private Page<Post> createDummy(Pageable pageable, int totalElements) {
