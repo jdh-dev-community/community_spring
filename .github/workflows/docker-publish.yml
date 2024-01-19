@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - dev
+      
 
 jobs:
   build:
@@ -93,3 +94,33 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+  
+      - name: Execute SSH Command
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          # SSH 키를 파일로 저장하고 권한 설정
+          echo "$SSH_KEY" > ec2-key.pem
+          chmod 600 ec2-key.pem
+
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no ${{secrets.EC2_HOST}} << EOF
+          sudo docker login -u ${{secrets.DOCKER_HUB_ID}} -p ${{secrets.DOCKER_HUB_TOKEN}}
+          sudo docker stop app
+          sudo docker rm app
+
+          sudo docker pull ${{secrets.DOCKER_HUB_REPO}}
+          sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=dev --name app teamjdh/dev-community-dev
+
+          EOF
+
+          rm -f ec2-key.pem
+          
+          
