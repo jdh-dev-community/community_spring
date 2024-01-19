@@ -111,11 +111,5 @@ jobs:
           chmod 600 ec2-key.pem
 
           ssh -i "ec2-key.pem" ec2-user@ec2-3-36-204-107.ap-northeast-2.compute.amazonaws.com
-          docker login -u teamjdh -p dckr_pat_1pao6yAfYwWByuf3ZrfvjX4Xf8M
-          docker pull teamjdh/dev-community-dev:latest
-          docker stop app
-          docker rm app
-          docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=dev --name app teamjdh/dev-community-dev
-          exit
-          
-          rm -f ec2-key.pem
+          exit   
+
