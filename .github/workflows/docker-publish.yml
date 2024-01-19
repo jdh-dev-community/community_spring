@@ -107,21 +107,14 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          # .ssh 디렉터리가 없으면 생성
-          mkdir -p $HOME/.ssh
-          chmod 700 $HOME/.ssh
-
           # SSH 키를 파일로 저장하고 권한 설정
           echo "$SSH_KEY" > ec2-key.pem
           chmod 600 ec2-key.pem
           
-          ssh-keyscan -H ${{secrets.EC2_HOST}} >> $HOME/.ssh/known_hosts
-          chmod 644 $HOME/.ssh/known_hosts
-
       - name: Execute SSH Command
         run: |
           # 원격 서버에 SSH로 접속하여 명령 실행
-          ssh -i ${{secrets.EC2_HOST}} 'echo "Hello, World!"'
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no ${{secrets.EC2_HOST}} 'echo "Hello, World!"'
 
           # SSH 키 파일 삭제
           rm -f ec2-key.pem
