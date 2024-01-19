@@ -101,15 +101,22 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
   
-      - name: SSH Command
+      - name: Setup SSH Keys and Known Hosts
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
           # SSH 키를 파일로 저장
           echo "$SSH_KEY" > ec2-key.pem
           chmod 600 ec2-key.pem
+          
+          ssh-keyscan -H ec2-3-36-204-107.ap-northeast-2.compute.amazonaws.com >> $HOME/.ssh/known_hosts
 
-          ssh -i "ec2-key.pem" ec2-user@ec2-3-36-204-107.ap-northeast-2.compute.amazonaws.com
-          exit   
+      - name: Execute SSH Command
+        run: |
+          # 원격 서버에 SSH로 접속하여 명령 실행
+          ssh -i ec2-key.pem ec2-user@ec2-3-36-204-107.ap-northeast-2.compute.amazonaws.com 'echo "Hello, World!"'
 
+          # SSH 키 파일 삭제
+          rm -f ec2-key.pem
