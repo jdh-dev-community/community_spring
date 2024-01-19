@@ -6,15 +6,19 @@ name: Docker
 # documentation.
 
 on:
-  pull_request:
-    branches: 
-      - dev
-    types:
-      - closed
+  push:
+    branches:
+      - init-cicd
+  
+  # pull_request:
+  #   branches: 
+  #     - dev
+  #   types:
+  #     - closed
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     environment: dev
     runs-on: ubuntu-latest
     permissions:
@@ -33,6 +37,10 @@ jobs:
         uses: sigstore/cosign-installer@6e04d228eb30da1757ee4e1dd75a0ec73a653e06 #v3.1.1
         with:
           cosign-release: 'v2.1.1'
+
+      - name: Create application.yml
+        run: |
+          echo -e "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
