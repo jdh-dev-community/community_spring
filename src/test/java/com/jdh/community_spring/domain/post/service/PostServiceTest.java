@@ -2,7 +2,8 @@ package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.common.exception.InvalidInputException;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.domain.post.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,17 +29,37 @@ import static org.mockito.Mockito.when;
 public class PostServiceTest {
 
   @Mock
+  private PostMapper postMapper;
+  @Mock
   private PostRepository postRepository;
   @InjectMocks
   private PostServiceImpl postService;
 
 
   @Nested
+  class 게시글생성하기서비스 {
+    @Test
+    public void 유효한Dto가인풋으로들어오면db에저장한다() {
+      CreateReqDto dto = new CreateReqDto("제목1", "내용", "카테고리", "작성자");
+      Post entity = new Post();
+      when(postMapper.toEntity(dto)).thenReturn(entity);
+
+      postService.createPost(dto);
+    }
+
+    @Test
+    public void Dto가null인경우InvalidDataAccessApiUsageException이발생한다() {
+      CreateReqDto dto = null;
+      when(postMapper.toEntity(dto)).thenThrow(InvalidDataAccessApiUsageException.class);
+      assertThrows(InvalidDataAccessApiUsageException.class,() -> postService.createPost(dto));
+    }
+  }
+
+  @Nested
   class 게시글목록서비스 {
 
     private final int PAGE = 0;
     private final int PAGE_SIZE = 10;
-
     private final int TOTAL_COUNT = 50;
 
     @Test
@@ -65,5 +87,7 @@ public class PostServiceTest {
       return new PageImpl<>(list, pageable, totalElements);
     }
   }
+
+
 
 }

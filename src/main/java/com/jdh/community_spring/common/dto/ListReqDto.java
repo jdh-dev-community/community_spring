@@ -1,4 +1,4 @@
-package com.jdh.community_spring.domain.post.dto;
+package com.jdh.community_spring.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

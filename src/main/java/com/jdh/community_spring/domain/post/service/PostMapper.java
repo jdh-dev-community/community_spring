@@ -1,21 +1,21 @@
 package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.domain.post.dto.PostCreateDto;
+import com.jdh.community_spring.domain.post.dto.CreateReqDto;
+import com.jdh.community_spring.domain.post.dto.CreateResDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PostMapper {
   PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
 
-
   @Mapping(source = "content", target = "textContent")
-  Post toEntity(PostCreateDto dto);
+  Post toEntity(CreateReqDto dto);
 
   @Mapping(source = "textContent", target = "content")
-  PostCreateDto toPostCreateDto(Post entity);
-
+  CreateResDto toPostCreateDto(Post entity);
 }

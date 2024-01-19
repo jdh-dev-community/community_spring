@@ -1,8 +1,10 @@
 package com.jdh.community_spring.domain.post.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.domain.post.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListReqDto;
 import org.springframework.data.domain.PageRequest;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import org.hamcrest.Matchers;
@@ -10,14 +12,21 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,13 +34,61 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PostControllerTest {
 
   @Autowired
+  private ObjectMapper objectMapper;
+  @Autowired
   private MockMvc mockMvc;
 
   @MockBean
   private PostService postService;
 
+
+  private final String baseUrl = "/api/v1";
+
   @Nested
-  class 게시글목록api {
+  class GetPostList {
+    private final String url = baseUrl + "/post";
+    @Test
+    public void RequestBody가유효할경우201을응답한다() throws Exception {
+      String requestBody = createDummyBody(null);
+      postAndVerify(requestBody)
+              .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void RequestBody에필수값이누락된경우400을응답한다() throws Exception {
+      String requestBody = createDummyBody("title");
+
+      postAndVerify(requestBody)
+              .andExpect(status().isBadRequest())
+              .andExpect(jsonPath("$.path", Matchers.equalTo(url)))
+              .andExpect(jsonPath("$.httpStatus", Matchers.equalTo(HttpStatus.BAD_REQUEST.name())))
+              .andExpect(jsonPath("$.timestamp", Matchers.notNullValue()))
+              .andExpect(jsonPath("$.message", Matchers.notNullValue()));
+    }
+
+    private ResultActions postAndVerify(String body) throws Exception {
+      return mockMvc.perform(post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(body));
+    }
+
+    private String createDummyBody(String deleteId) throws JsonProcessingException {
+
+      Map<String, String> dummy = new HashMap<>();
+      dummy.put("title", "제목");
+      dummy.put("content", "내용");
+      dummy.put("category", "카테고리");
+      dummy.put("creator", "생성자");
+
+      if (deleteId != null) dummy.remove(deleteId);
+      String json = objectMapper.writeValueAsString(dummy);
+
+      return json;
+    }
+  }
+
+  @Nested
+  class CreatePost {
     private final int TOTAL_COUNT = 50;
 
 
@@ -40,7 +97,7 @@ public class PostControllerTest {
       int page = 1;
       int pageSize = 10;
 
-      String url = new StringBuilder("/api/v1/post")
+      String url = new StringBuilder(baseUrl + "/post")
               .toString();
 
       when(postService.getPostList(PageRequest.of(page - 1, pageSize)))

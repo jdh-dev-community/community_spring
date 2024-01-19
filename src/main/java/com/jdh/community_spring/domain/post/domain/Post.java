@@ -39,8 +39,6 @@ public class Post extends BaseEntity {
   @Column(name = "view_count")
   private int viewCount;
 
-
-
   public Post (String title, String textContent, String creator, String category) {
     this.title = title;
     this.textContent = textContent;
