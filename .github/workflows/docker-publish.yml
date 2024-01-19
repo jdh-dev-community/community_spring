@@ -104,13 +104,18 @@ jobs:
   
       - name: SSH Command
         env:
-          SSH_KEY: ${{ secrets.SSH_KEY }} # GitHub Secret에서 SSH_KEY를 가져옵니다.
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
           # SSH 키를 파일로 저장
           echo "$SSH_KEY" > ec2-key.pem
           chmod 600 ec2-key.pem
-      
-          # 여기에 SSH를 사용한 스크립트 또는 명령을 추가합니다.
-      
-          # SSH 키 파일 삭제
-          # rm -f ec2-key.pem
+
+          ssh -i "ec2-key.pem" ec2-user@ec2-3-36-204-107.ap-northeast-2.compute.amazonaws.com
+          sudo docker login -u teamjdh -p dckr_pat_1pao6yAfYwWByuf3ZrfvjX4Xf8M
+          sudo docker pull teamjdh/dev-community-dev:latest
+          sudo docker stop app
+          sudo docker rm app
+          sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=dev --name app teamjdh/dev-community-dev
+          exit
+          
+          rm -f ec2-key.pem
