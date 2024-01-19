@@ -1,4 +1,4 @@
-name: Docker
+name: Build-prod
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -8,12 +8,12 @@ name: Docker
 on:
   push:
     branches:
-      - dev
+      - main
       
 
 jobs:
   build:
-    environment: dev
+    environment: prod
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -117,7 +117,7 @@ jobs:
           sudo docker rm app
 
           sudo docker pull ${{secrets.DOCKER_HUB_REPO}}
-          sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=dev --name app teamjdh/dev-community-dev
+          sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=prod --name app teamjdh/dev-community-prod
 
           EOF
 
