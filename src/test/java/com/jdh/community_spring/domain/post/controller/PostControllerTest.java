@@ -90,15 +90,12 @@ public class PostControllerTest {
   @Nested
   class CreatePost {
     private final int TOTAL_COUNT = 50;
-
-
+    private final String url = baseUrl + "/post";
+    
     @Test
     public void 쿼리에페이지와사이즈가포함되지않은경우에는기본값을사용해서200을응답한다() throws Exception {
       int page = 1;
       int pageSize = 10;
-
-      String url = new StringBuilder(baseUrl + "/post")
-              .toString();
 
       when(postService.getPostList(PageRequest.of(page - 1, pageSize)))
               .thenReturn(createDummy(pageSize, TOTAL_COUNT));
@@ -114,7 +111,7 @@ public class PostControllerTest {
       int page = 2;
       int pageSize = 5;
 
-      String url = new StringBuilder("/api/v1/post")
+      String path = new StringBuilder(url)
               .append("?page=" + page)
               .append("&size=" + pageSize)
               .toString();
@@ -122,7 +119,7 @@ public class PostControllerTest {
       when(postService.getPostList(PageRequest.of(page - 1, pageSize)))
               .thenReturn(createDummy(pageSize, TOTAL_COUNT));
 
-      mockMvc.perform(get(url))
+      mockMvc.perform(get(path))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
               .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
