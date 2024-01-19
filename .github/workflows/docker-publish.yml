@@ -103,18 +103,24 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
   
-      - name: Setup SSH Keys and Known Hosts
+      - name: Execute SSH Command
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
           # SSH 키를 파일로 저장하고 권한 설정
           echo "$SSH_KEY" > ec2-key.pem
           chmod 600 ec2-key.pem
-          
-      - name: Execute SSH Command
-        run: |
-          # 원격 서버에 SSH로 접속하여 명령 실행
-          ssh -i ec2-key.pem -o StrictHostKeyChecking=no ${{secrets.EC2_HOST}} 'echo "Hello, World!"'
 
-          # SSH 키 파일 삭제
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no ${{secrets.EC2_HOST}} << EOF
+          sudo docker login -u ${{DOCKER_HUB_ID}} -p ${{DOCKER_HUB_TOKEN}}
+          sudo docker stop app
+          sudo docker rm app
+
+          sudo docker pull ${{DOCKER_HUB_REPO}}
+          sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=dev --name app teamjdh/dev-community-dev
+
+          EOF
+
           rm -f ec2-key.pem
+          
+          
