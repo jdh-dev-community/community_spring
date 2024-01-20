@@ -122,6 +122,6 @@ jobs:
 
           EOF
 
-          rm -f ec2-key-prod.pem
+          rm -f ec2-key.pem
           
           
