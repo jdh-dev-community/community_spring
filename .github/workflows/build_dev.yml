@@ -8,7 +8,7 @@ name: Build-dev
 on:
   push:
     branches:
-      - init-cicd
+      - dev
       
 
 jobs:

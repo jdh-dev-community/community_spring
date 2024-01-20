@@ -8,7 +8,7 @@ name: Build-prod
 on:
   push:
     branches:
-      - prod
+      - main
       
 
 jobs:
