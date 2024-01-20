@@ -8,7 +8,7 @@ name: Build-prod
 on:
   push:
     branches:
-      - init-cicd
+      - prod
       
 
 jobs:
