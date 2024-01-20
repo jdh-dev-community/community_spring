@@ -8,7 +8,7 @@ name: Build-dev
 on:
   push:
     branches:
-      - dev
+      - dev
       
 
 jobs:
@@ -122,6 +122,6 @@ jobs:
 
           EOF
 
-          rm -f ec2-key.pem
+          rm -f ec2-key-prod.pem
           
           

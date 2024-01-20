@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-
       
 
 jobs:
@@ -124,5 +123,5 @@ jobs:
           EOF
 
           rm -f ec2-key-prod.pem
-
-
+          
+          
