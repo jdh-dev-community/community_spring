@@ -111,15 +111,15 @@ jobs:
           echo "$SSH_KEY" > ec2-key-prod.pem
           chmod 600 ec2-key-prod.pem
 
-          # ssh -i ec2-key.pem -o StrictHostKeyChecking=no ${{secrets.EC2_HOST}} << EOF
-          # sudo docker login -u ${{secrets.DOCKER_HUB_ID}} -p ${{secrets.DOCKER_HUB_TOKEN}}
-          # sudo docker stop app
-          # sudo docker rm app
+          ssh -i ec2-key-prod.pem -o StrictHostKeyChecking=no ${{secrets.EC2_HOST}} << EOF
+          sudo docker login -u ${{secrets.DOCKER_HUB_ID}} -p ${{secrets.DOCKER_HUB_TOKEN}}
+          sudo docker stop app
+          sudo docker rm app
 
-          # sudo docker pull ${{secrets.DOCKER_HUB_REPO}}
-          # sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=prod --name app teamjdh/dev-community-prod
+          sudo docker pull ${{secrets.DOCKER_HUB_REPO}}
+          sudo docker run -d -p 80:8080 -e SPRING_PROFILES_ACTIVE=prod --name app teamjdh/dev-community-prod
 
-          # EOF
+          EOF
 
           rm -f ec2-key-prod.pem
           
