@@ -35,6 +35,7 @@ public class PostServiceImpl implements PostService {
   public ListReqDto<Post> getPostList(Pageable pageable) {
     if (pageable == null) throw new IllegalArgumentException("Pageable이 존재하지 않습니다.");
 
+    // TODO: post를 CreateResDto로 변경해서 ListReqDto에 담기
     Page<Post> page = postRepository.findAll(pageable);
     ListReqDto<Post> dto = new ListReqDto<>(page.getTotalElements(), page.getContent());
     return dto;

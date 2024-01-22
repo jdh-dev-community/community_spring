@@ -4,6 +4,7 @@ import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -21,12 +22,16 @@ public class PostController {
 
   private final PostService postService;
 
+  @Operation(summary = "게시글 생성", description = "제목, 내용, 작성자, 카테고리를 포함하는 게시글을 작성합니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post")
   public void createPost(@Valid @RequestBody CreateReqDto dto) {
     postService.createPost(dto);
   }
 
+
+
+  @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")
   @GetMapping("/post")
   public ListReqDto<Post> getPostList(
           @RequestParam(defaultValue = "1") int page,
