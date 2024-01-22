@@ -31,6 +31,7 @@ public class PostController {
 
 
 
+  @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")
   @GetMapping("/post")
   public ListReqDto<Post> getPostList(
           @RequestParam(defaultValue = "1") int page,

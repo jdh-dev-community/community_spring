@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 @RequiredArgsConstructor
 public class CreateReqDto {
-
   @Schema(description = "게시글의 제목", example = "Why this error occurs?")
   @NotBlank(message = "제목은 필수 입력 값입니다.")
   private final String title;
@@ -29,5 +28,4 @@ public class CreateReqDto {
   @Schema(description = "게시글의 작성자", example = "jack")
   @NotNull(message = "작성자는 필수 입력 값입니다.")
   private final String creator;
-
 }
