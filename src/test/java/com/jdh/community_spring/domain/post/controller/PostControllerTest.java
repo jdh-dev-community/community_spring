@@ -151,11 +151,11 @@ public class PostControllerTest {
     public void 요청에_유효한id포함시_성공응답반환() throws Exception {
       String validId = "1";
 
-      when(postService.getPost(String.valueOf(validId))).thenReturn(createDummyPost(validId));
+      when(postService.getPost(validId)).thenReturn(createDummyPost(validId));
 
       mockMvc.perform(get(url + "/" + validId))
               .andExpect(status().isOk())
-              .andExpect(jsonPath("$.postId", Matchers.equalTo(validId)));
+              .andExpect(jsonPath("$.postId", Matchers.equalTo(Integer.parseInt(validId))));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class PostControllerTest {
 
     private PostResDto createDummyPost(String postId) throws JsonProcessingException {
       PostResDto dto = new PostResDto(
-              Integer.parseInt(postId),
+              Long.parseLong(postId),
               "t",
               "t",
               "t",
