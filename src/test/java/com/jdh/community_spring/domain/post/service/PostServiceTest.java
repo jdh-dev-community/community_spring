@@ -1,10 +1,13 @@
 package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.common.exception.InvalidInputException;
+import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
+import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +20,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -36,10 +41,11 @@ public class PostServiceTest {
   private PostServiceImpl postService;
 
 
+  @DisplayName("게시글생성하기서비스")
   @Nested
-  class 게시글생성하기서비스 {
+  class CreatePost {
     @Test
-    public void 유효한Dto가인풋으로들어오면db에저장한다() {
+    public void 인풋이_유효한경우_db에저장() {
       CreateReqDto dto = new CreateReqDto("제목1", "내용", "카테고리", "작성자");
       Post entity = new Post();
       when(postMapper.toEntity(dto)).thenReturn(entity);
@@ -48,22 +54,23 @@ public class PostServiceTest {
     }
 
     @Test
-    public void Dto가null인경우InvalidDataAccessApiUsageException이발생한다() {
+    public void 인풋이_null인경우_InvalidDataAccessApiUsageException이발생() {
       CreateReqDto dto = null;
       when(postMapper.toEntity(dto)).thenThrow(InvalidDataAccessApiUsageException.class);
       assertThrows(InvalidDataAccessApiUsageException.class,() -> postService.createPost(dto));
     }
   }
 
+  @DisplayName("게시글목록서비스")
   @Nested
-  class 게시글목록서비스 {
+  class GetPostList {
 
     private final int PAGE = 0;
     private final int PAGE_SIZE = 10;
     private final int TOTAL_COUNT = 50;
 
     @Test
-    public void Pageable이인풋으로들어오면ListReqDto를반환한다() {
+    public void 인풋에_유효한Pageable인경우_ListReqDto를반환() {
       Pageable pageable = PageRequest.of(PAGE, PAGE_SIZE);
       when(postRepository.findAll(pageable)).thenReturn(createDummy(pageable, TOTAL_COUNT));
 
@@ -73,7 +80,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void Pageable이Null인경우는InvalidInputException발생한다() {
+    public void 인풋이_Null인경우_InvalidInputException발생() {
       Pageable pageable = null;
       assertThrows(IllegalArgumentException.class, () -> postService.getPostList(pageable));
     }
@@ -89,5 +96,42 @@ public class PostServiceTest {
   }
 
 
+  @DisplayName("게시글목록서비스")
+  @Nested
+  class GetPost {
+
+    @Test
+    public void 인풋이_long타입으로변환되고_매치되는게시글이있다면_PostResDto반환() {
+      String validId = "353";
+      long id = Long.parseLong(validId);
+
+      Post dummyPost = new Post(id,"제목", "컨텐츠", "작성자", "카테고리", 10);
+      PostResDto dummyResult = new PostResDto(id, "제목", "컨텐츠", "작성자", "카테고리", 10, LocalDateTime.now());
+
+      when(postRepository.findById(id)).thenReturn(Optional.of(dummyPost));
+      when(postMapper.toPostResDto(dummyPost)).thenReturn(dummyResult);
+
+      PostResDto result = postService.getPost(validId);
+
+      assertThat(result.getPostId()).isEqualTo(id);
+    }
+
+    @Test
+    public void 인풋이_long타입으로변환되지만_매치되는게시글이없다면_NotFound예외발생() {
+      String notMatchedId = "10000";
+      long id = Long.parseLong(notMatchedId);
+
+      when(postRepository.findById(id)).thenReturn(Optional.empty());
+      assertThrows(NotFoundException.class, () -> postService.getPost(notMatchedId));
+    }
+
+    @Test
+    public void 인풋이_long타입으로변환되지않는경우_NumberForMatException발생() {
+      String invalidId = "a";
+      assertThrows(NumberFormatException.class, () -> postService.getPost(invalidId));
+    }
+
+
+  }
 
 }

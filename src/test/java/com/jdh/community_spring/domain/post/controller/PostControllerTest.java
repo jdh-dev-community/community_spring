@@ -3,8 +3,10 @@ package com.jdh.community_spring.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.domain.post.dto.PostResDto;
 import org.springframework.data.domain.PageRequest;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import org.hamcrest.Matchers;
@@ -17,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,18 +47,20 @@ public class PostControllerTest {
 
   private final String baseUrl = "/api/v1";
 
+  @DisplayName("게시글 생성")
   @Nested
-  class GetPostList {
+  class CreatePost {
     private final String url = baseUrl + "/post";
+
     @Test
-    public void RequestBody가유효할경우201을응답한다() throws Exception {
+    public void 요청의_Body가_유효할경우_201응답() throws Exception {
       String requestBody = createDummyBody(null);
       postAndVerify(requestBody)
               .andExpect(status().isCreated());
     }
 
     @Test
-    public void RequestBody에필수값이누락된경우400을응답한다() throws Exception {
+    public void 요청의_Body에_필수값이누락된경우_400을응답() throws Exception {
       String requestBody = createDummyBody("title");
 
       postAndVerify(requestBody)
@@ -87,13 +92,14 @@ public class PostControllerTest {
     }
   }
 
+  @DisplayName("게시글 목록 조회")
   @Nested
-  class CreatePost {
+  class GetPostList {
     private final int TOTAL_COUNT = 50;
     private final String url = baseUrl + "/post";
-    
+
     @Test
-    public void 쿼리에페이지와사이즈가포함되지않은경우에는기본값을사용해서200을응답한다() throws Exception {
+    public void 요청에_페이지와사이즈미포함시_기본값사용하여_성공응답반환() throws Exception {
       int page = 1;
       int pageSize = 10;
 
@@ -107,7 +113,7 @@ public class PostControllerTest {
     }
 
     @Test
-    public void 쿼리에페이지와사이즈가포함된경우에는쿼리를사용해서200을응답한다() throws Exception {
+    public void 요청에_페이지와사이즈포함시_해당값사용하여_성공응답반환() throws Exception {
       int page = 2;
       int pageSize = 5;
 
@@ -133,6 +139,61 @@ public class PostControllerTest {
       ListReqDto<Post> dto = new ListReqDto<>(totalElements, list);
       return dto;
     }
+  }
+
+  @DisplayName("게시글 상세 조회")
+  @Nested
+  class GetPost {
+    private final String url = baseUrl + "/post";
+
+
+    @Test
+    public void 요청에_유효한id포함시_성공응답반환() throws Exception {
+      String validId = "1";
+
+      when(postService.getPost(String.valueOf(validId))).thenReturn(createDummyPost(validId));
+
+      mockMvc.perform(get(url + "/" + validId))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.postId", Matchers.equalTo(validId)));
+    }
+
+    @Test
+    public void 요청에_유효하지않은id포함시_400응답반환() throws Exception {
+      String validId = "invalidId";
+
+      when(postService.getPost(String.valueOf(validId))).thenThrow(IllegalArgumentException.class);
+
+      mockMvc.perform(get(url + "/" + validId))
+              .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void 요청에_포함된id에_매칭되는게시글이없을시_404응답반환() throws Exception {
+      String notMatchedId = "1000000";
+
+      when(postService.getPost(String.valueOf(notMatchedId))).thenThrow(NotFoundException.class);
+
+      mockMvc.perform(get(url + "/" + notMatchedId))
+              .andExpect(status().isNotFound());
+    }
+
+
+    private PostResDto createDummyPost(String postId) throws JsonProcessingException {
+      PostResDto dto = new PostResDto(
+              Integer.parseInt(postId),
+              "t",
+              "t",
+              "t",
+              "2",
+              1,
+              LocalDateTime.now()
+      );
+
+      return dto;
+    }
 
   }
 }
+
+

@@ -2,6 +2,7 @@ package com.jdh.community_spring.common.advice;
 
 import com.jdh.community_spring.common.dto.HttpErrorInfo;
 import com.jdh.community_spring.common.exception.InvalidInputException;
+import com.jdh.community_spring.common.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
@@ -14,13 +15,18 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ResponseStatus(NOT_FOUND)
+  @ExceptionHandler(NotFoundException.class)
+  public @ResponseBody HttpErrorInfo handleNotFoundException(WebRequest req, NotFoundException ex) {
+    return createHttpErrorInfo(NOT_FOUND, req, ex);
+  }
 
   @ResponseStatus(BAD_REQUEST)
   @ExceptionHandler(InvalidDataAccessApiUsageException.class)
