@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @RequiredArgsConstructor
-public class CreateResDto {
+public class PostResDto {
 
   @Schema(description = "게시글의 id", example = "1")
   @NotNull(message = "게시글 id는 필수 입력 값입니다.")

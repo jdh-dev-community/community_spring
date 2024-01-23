@@ -1,8 +1,10 @@
 package com.jdh.community_spring.domain.post.service;
 
+import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
+import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,6 +24,7 @@ public class PostServiceImpl implements PostService {
   private final PostRepository postRepository;
 
   private final PostMapper postMapper;
+
 
   @Override
   public void createPost(CreateReqDto dto) {
@@ -41,4 +47,17 @@ public class PostServiceImpl implements PostService {
     return dto;
   }
 
+  @Override
+  public PostResDto getPost(String id) {
+    long postId = Long.parseLong(id);
+    Optional<Post> optPost = postRepository.findById(postId);
+    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+    PostResDto result = postMapper.toPostResDto(post);
+
+    return result;
+  }
 }
+
+
+
+

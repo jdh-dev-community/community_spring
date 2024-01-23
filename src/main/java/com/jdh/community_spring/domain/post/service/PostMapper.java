@@ -2,7 +2,7 @@ package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
-import com.jdh.community_spring.domain.post.dto.CreateResDto;
+import com.jdh.community_spring.domain.post.dto.PostResDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -17,5 +17,5 @@ public interface PostMapper {
   Post toEntity(CreateReqDto dto);
 
   @Mapping(source = "textContent", target = "content")
-  CreateResDto toPostCreateDto(Post entity);
+  PostResDto toPostResDto(Post entity);
 }
