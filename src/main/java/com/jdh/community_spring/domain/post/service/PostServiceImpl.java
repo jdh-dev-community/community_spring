@@ -2,7 +2,7 @@ package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -38,12 +37,12 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public ListReqDto<Post> getPostList(Pageable pageable) {
+  public ListResDto<Post> getPostList(Pageable pageable) {
     if (pageable == null) throw new IllegalArgumentException("Pageable이 존재하지 않습니다.");
 
     // TODO: post를 CreateResDto로 변경해서 ListReqDto에 담기
     Page<Post> page = postRepository.findAll(pageable);
-    ListReqDto<Post> dto = new ListReqDto<>(page.getTotalElements(), page.getContent());
+    ListResDto<Post> dto = new ListResDto<>(page.getTotalElements(), page.getContent());
     return dto;
   }
 

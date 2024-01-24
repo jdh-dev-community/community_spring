@@ -1,10 +1,9 @@
 package com.jdh.community_spring.domain.post.service;
 
-import com.jdh.community_spring.common.exception.InvalidInputException;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
@@ -75,7 +74,7 @@ public class PostServiceTest {
       Pageable pageable = PageRequest.of(PAGE, PAGE_SIZE);
       when(postRepository.findAll(pageable)).thenReturn(createDummy(pageable, TOTAL_COUNT));
 
-      ListReqDto<Post> result = postService.getPostList(pageable);
+      ListResDto<Post> result = postService.getPostList(pageable);
       assertThat(result.getElementsCount()).isEqualTo(TOTAL_COUNT);
       assertThat(result.getContent().size()).isLessThanOrEqualTo(PAGE_SIZE);
     }

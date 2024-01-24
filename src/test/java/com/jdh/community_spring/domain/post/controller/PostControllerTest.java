@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import org.springframework.data.domain.PageRequest;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
@@ -133,12 +133,12 @@ public class PostControllerTest {
               .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
     }
 
-    private ListReqDto<Post> createDummy(int size, int totalElements) {
+    private ListResDto<Post> createDummy(int size, int totalElements) {
       List<Post> list = IntStream.rangeClosed(1, size)
               .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", SimplePasswordEncoder.encode("1234")))
               .collect(Collectors.toList());
 
-      ListReqDto<Post> dto = new ListReqDto<>(totalElements, list);
+      ListResDto<Post> dto = new ListResDto<>(totalElements, list);
       return dto;
     }
   }

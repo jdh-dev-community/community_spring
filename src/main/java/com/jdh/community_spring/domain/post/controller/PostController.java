@@ -1,7 +1,7 @@
 package com.jdh.community_spring.domain.post.controller;
 
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,14 +32,15 @@ public class PostController {
 
 
 
+  // NOTE: 프론트에서는 page가 1부터 시작하고 있어서 서버에서 -1을 합니다.
   @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")
   @GetMapping("/post")
-  public ListReqDto<Post> getPostList(
+  public ListResDto<Post> getPostList(
           @RequestParam(defaultValue = "1") int page,
           @RequestParam(defaultValue = "10") int size
   ) {
     Pageable pageable = PageRequest.of(page - 1, size);
-    ListReqDto<Post> dto = postService.getPostList(pageable);
+    ListResDto<Post> dto = postService.getPostList(pageable);
 
     return dto;
   }
