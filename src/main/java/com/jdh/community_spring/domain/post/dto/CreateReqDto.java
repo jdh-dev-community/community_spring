@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 
 @Getter
@@ -28,4 +29,9 @@ public class CreateReqDto {
   @Schema(description = "게시글의 작성자", example = "jack")
   @NotNull(message = "작성자는 필수 입력 값입니다.")
   private final String creator;
+
+  @Schema(description = "게시글 비밀번호", example = "1234")
+  @NotNull(message = "비밀번호는 필수 입력값입니다.")
+  @Size(min = 4)
+  private final String password;
 }

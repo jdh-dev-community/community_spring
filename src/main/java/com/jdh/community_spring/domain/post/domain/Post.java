@@ -11,7 +11,7 @@ import javax.persistence.*;
 
 
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -48,11 +48,15 @@ public class Post extends BaseEntity {
   @Column(name = "view_count")
   private int viewCount;
 
-  public Post (String title, String textContent, String creator, String category) {
+  @Schema(description = "최소 4자리를 사용하는 게시글의 비밀번호", example = "1234")
+  @Column(name = "password")
+  private String password;
+
+  public Post(String title, String textContent, String creator, String category, String password) {
     this.title = title;
     this.textContent = textContent;
     this.creator = creator;
     this.category = category;
+    this.password = password;
   }
-
 }
