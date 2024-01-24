@@ -15,10 +15,10 @@ public abstract class BaseEntity {
   @Schema(description = "생성일자", example = "2023-01-01T12:00:00")
   @CreationTimestamp
   @Column(name = "created_at")
-  private LocalDateTime createdAt;
+  private LocalDateTime createdAt = LocalDateTime.now();
 
   @Schema(description = "최근수정일", example = "2023-01-01T12:00:00")
   @CreationTimestamp
   @Column(name = "updated_at")
-  private LocalDateTime updatedAt;
+  private LocalDateTime updatedAt = LocalDateTime.now();
 }

@@ -3,11 +3,13 @@ package com.jdh.community_spring.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
+import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
 import org.springframework.data.domain.PageRequest;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import org.hamcrest.Matchers;
@@ -19,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -36,14 +39,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(PostController.class)
 public class PostControllerTest {
-
   @Autowired
   private ObjectMapper objectMapper;
+
   @Autowired
   private MockMvc mockMvc;
 
   @MockBean
   private PostService postService;
+
 
 
   private final String baseUrl = "/api/v1";
@@ -98,15 +102,37 @@ public class PostControllerTest {
   @Nested
   class GetPostList {
     private final int TOTAL_COUNT = 50;
-    private final String url = baseUrl + "/post";
 
     @Test
-    public void 요청에_페이지와사이즈미포함시_기본값사용하여_성공응답반환() throws Exception {
-      int page = 1;
-      int pageSize = 10;
+    public void 요청에_쿼리미함포시_기본값사용하여_성공응답반환() throws Exception {
+      String url = baseUrl + "/post";
 
-      when(postService.getPostList(PageRequest.of(page - 1, pageSize)))
-              .thenReturn(createDummy(pageSize, TOTAL_COUNT));
+      ListReqDto dto = new ListReqDto(1, 10, "createdAt", "desc");
+      when(postService.getPostList(dto))
+              .thenReturn(createDummy(dto.getSize(), TOTAL_COUNT));
+
+      mockMvc.perform(get(url))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
+              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(dto.getSize())));
+    }
+
+    @Test
+    public void 요청에_쿼리포함시_해당값사용하여_성공응답반환() throws Exception {
+      int page = 2;
+      int pageSize = 5;
+      String sortBy = "createdAt";
+      String orderBy = "desc";
+
+      String url = new StringBuilder(baseUrl + "/post")
+              .append("?page=" + page)
+              .append("&size=" + pageSize)
+              .append("&sortBy=" + sortBy)
+              .append("&orderBy=" + orderBy)
+              .toString();
+
+      ListReqDto dto = new ListReqDto(page, pageSize, sortBy, orderBy);
+      when(postService.getPostList(dto)).thenReturn(createDummy(pageSize, TOTAL_COUNT));
 
       mockMvc.perform(get(url))
               .andExpect(status().isOk())
@@ -115,31 +141,27 @@ public class PostControllerTest {
     }
 
     @Test
-    public void 요청에_페이지와사이즈포함시_해당값사용하여_성공응답반환() throws Exception {
-      int page = 2;
-      int pageSize = 5;
+    public void 요청에_유효하지않은값이포함시_400응답반환() throws Exception {
+      int invalidPage = 0;
+      int invalidSize = 0;
 
-      String path = new StringBuilder(url)
-              .append("?page=" + page)
-              .append("&size=" + pageSize)
-              .toString();
+      String url = baseUrl + "/post?page=" + invalidPage + "&size=" + invalidSize;
 
-      when(postService.getPostList(PageRequest.of(page - 1, pageSize)))
-              .thenReturn(createDummy(pageSize, TOTAL_COUNT));
+      mockMvc.perform(get(url))
+              .andExpect(status().isBadRequest())
+              .andExpect(jsonPath("$.path", Matchers.equalTo(baseUrl + "/post")))
+              .andExpect(jsonPath("$.httpStatus", Matchers.equalTo(HttpStatus.BAD_REQUEST.name())))
+              .andExpect(jsonPath("$.timestamp", Matchers.notNullValue()))
+              .andExpect(jsonPath("$.message", Matchers.notNullValue()));
 
-      mockMvc.perform(get(path))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
-              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
     }
 
-    private ListReqDto<Post> createDummy(int size, int totalElements) {
-      List<Post> list = IntStream.rangeClosed(1, size)
-              .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", SimplePasswordEncoder.encode("1234")))
+    private ListResDto<PostResDto> createDummy(int size, int totalElements) {
+      List<PostResDto> list = IntStream.rangeClosed(1, size)
+              .mapToObj((i) -> new PostResDto(i,"제목" + i, "이건 더미 데이터", "테스트", "테스트", 0,LocalDateTime.now()))
               .collect(Collectors.toList());
 
-      ListReqDto<Post> dto = new ListReqDto<>(totalElements, list);
-      return dto;
+      return new ListResDto<>(totalElements, list);
     }
   }
 

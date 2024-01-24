@@ -1,13 +1,14 @@
 package com.jdh.community_spring.domain.post.service;
 
-import com.jdh.community_spring.common.exception.InvalidInputException;
+import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
+import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,33 +73,46 @@ public class PostServiceTest {
     private final int TOTAL_COUNT = 50;
 
     @Test
-    public void 인풋에_유효한Pageable인경우_ListReqDto를반환() {
-      Pageable pageable = PageRequest.of(PAGE, PAGE_SIZE);
+    public void 인풋이_유효한ListReqDto인경우_ListResDto를반환() {
+      ListReqDto dto = new ListReqDto(1, 10, "createdAt", "desc");
+      Pageable pageable = dto.toPageable();
       when(postRepository.findAll(pageable)).thenReturn(createDummy(pageable, TOTAL_COUNT));
 
-      ListReqDto<Post> result = postService.getPostList(pageable);
+      ListResDto<PostResDto> result = postService.getPostList(dto);
       assertThat(result.getElementsCount()).isEqualTo(TOTAL_COUNT);
       assertThat(result.getContent().size()).isLessThanOrEqualTo(PAGE_SIZE);
     }
 
     @Test
-    public void 인풋이_Null인경우_InvalidInputException발생() {
-      Pageable pageable = null;
-      assertThrows(IllegalArgumentException.class, () -> postService.getPostList(pageable));
+    public void ListReqDto의_orderBy가desc인경우_내림차순정렬() {
+      ListReqDto input = new ListReqDto(1, 10, "createdAt", "desc");
+      Pageable pageable = input.toPageable();
+
+      when(postRepository.findAll(pageable)).thenReturn(createDummy(pageable, TOTAL_COUNT));
+      when(postMapper.toPostResDto(any(Post.class)))
+              .thenAnswer(invocation -> {
+                Post post = invocation.getArgument(0);
+                return new PostResDto(post.getPostId(), post.getTitle(), post.getTextContent(), post.getCategory(), post.getCreator(), post.getViewCount(), post.getCreatedAt());
+              });
+
+
+      ListResDto<PostResDto> result = postService.getPostList(input);
+
+      assertThat(result.getContent().size()).isEqualTo(10);
+      assertThat(result.getContent().get(1).getCreatedAt()).isAfterOrEqualTo(result.getContent().get(0).getCreatedAt());
     }
 
     private Page<Post> createDummy(Pageable pageable, int totalElements) {
       List<Post> list = IntStream.rangeClosed(1, pageable.getPageSize())
-              .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", SimplePasswordEncoder.encode("1234")))
+              .mapToObj((i) -> new Post(i, "title" + i, "text", "creator", "category", 0, SimplePasswordEncoder.encode("1234")))
               .collect(Collectors.toList());
-
 
       return new PageImpl<>(list, pageable, totalElements);
     }
   }
 
 
-  @DisplayName("게시글목록서비스")
+  @DisplayName("게시글상세서비스")
   @Nested
   class GetPost {
 
@@ -107,7 +122,7 @@ public class PostServiceTest {
       long id = Long.parseLong(validId);
 
       Post dummyPost = new Post(id,"제목", "컨텐츠", "작성자", "카테고리", 10, SimplePasswordEncoder.encode("1234"));
-      PostResDto dummyResult = new PostResDto(id, "제목", "컨텐츠", "작성자", "카테고리", 10, LocalDateTime.now());
+      PostResDto dummyResult = new PostResDto(id, "제목", "컨텐츠", "작성자", "카테고리", 10, dummyPost.getCreatedAt());
 
       when(postRepository.findById(id)).thenReturn(Optional.of(dummyPost));
       when(postMapper.toPostResDto(dummyPost)).thenReturn(dummyResult);

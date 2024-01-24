@@ -1,20 +1,23 @@
 package com.jdh.community_spring.domain.post.service;
 
+import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
+import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,13 +41,15 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public ListReqDto<Post> getPostList(Pageable pageable) {
-    if (pageable == null) throw new IllegalArgumentException("Pageable이 존재하지 않습니다.");
+  public ListResDto<PostResDto> getPostList(ListReqDto listReqDto) {
+    Pageable pageable = listReqDto.toPageable();
 
-    // TODO: post를 CreateResDto로 변경해서 ListReqDto에 담기
     Page<Post> page = postRepository.findAll(pageable);
-    ListReqDto<Post> dto = new ListReqDto<>(page.getTotalElements(), page.getContent());
-    return dto;
+    List<PostResDto> dto = page.getContent().stream()
+            .map(postMapper::toPostResDto)
+            .collect(Collectors.toList());
+
+    return new ListResDto<>(page.getTotalElements(), dto);
   }
 
   @Override
