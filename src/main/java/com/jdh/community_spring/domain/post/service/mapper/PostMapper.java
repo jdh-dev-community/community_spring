@@ -1,4 +1,4 @@
-package com.jdh.community_spring.domain.post.service;
+package com.jdh.community_spring.domain.post.service.mapper;
 
 import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
