@@ -2,6 +2,7 @@ package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.common.exception.InvalidInputException;
 import com.jdh.community_spring.common.exception.NotFoundException;
+import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
@@ -46,7 +47,7 @@ public class PostServiceTest {
   class CreatePost {
     @Test
     public void 인풋이_유효한경우_db에저장() {
-      CreateReqDto dto = new CreateReqDto("제목1", "내용", "카테고리", "작성자");
+      CreateReqDto dto = new CreateReqDto("제목1", "내용", "카테고리", "작성자", "1234");
       Post entity = new Post();
       when(postMapper.toEntity(dto)).thenReturn(entity);
 
@@ -87,7 +88,7 @@ public class PostServiceTest {
 
     private Page<Post> createDummy(Pageable pageable, int totalElements) {
       List<Post> list = IntStream.rangeClosed(1, pageable.getPageSize())
-              .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트"))
+              .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", SimplePasswordEncoder.encode("1234")))
               .collect(Collectors.toList());
 
 
@@ -105,7 +106,7 @@ public class PostServiceTest {
       String validId = "353";
       long id = Long.parseLong(validId);
 
-      Post dummyPost = new Post(id,"제목", "컨텐츠", "작성자", "카테고리", 10);
+      Post dummyPost = new Post(id,"제목", "컨텐츠", "작성자", "카테고리", 10, SimplePasswordEncoder.encode("1234"));
       PostResDto dummyResult = new PostResDto(id, "제목", "컨텐츠", "작성자", "카테고리", 10, LocalDateTime.now());
 
       when(postRepository.findById(id)).thenReturn(Optional.of(dummyPost));

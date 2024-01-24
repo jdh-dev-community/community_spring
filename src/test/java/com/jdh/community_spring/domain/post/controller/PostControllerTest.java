@@ -4,6 +4,7 @@ package com.jdh.community_spring.domain.post.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdh.community_spring.common.exception.NotFoundException;
+import com.jdh.community_spring.common.util.SimplePasswordEncoder;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
@@ -84,6 +85,7 @@ public class PostControllerTest {
       dummy.put("content", "내용");
       dummy.put("category", "카테고리");
       dummy.put("creator", "생성자");
+      dummy.put("password", "1234");
 
       if (deleteId != null) dummy.remove(deleteId);
       String json = objectMapper.writeValueAsString(dummy);
@@ -133,7 +135,7 @@ public class PostControllerTest {
 
     private ListReqDto<Post> createDummy(int size, int totalElements) {
       List<Post> list = IntStream.rangeClosed(1, size)
-              .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트"))
+              .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", SimplePasswordEncoder.encode("1234")))
               .collect(Collectors.toList());
 
       ListReqDto<Post> dto = new ListReqDto<>(totalElements, list);
