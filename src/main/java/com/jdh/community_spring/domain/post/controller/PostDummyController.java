@@ -1,8 +1,9 @@
 package com.jdh.community_spring.domain.post.controller;
 
-import com.jdh.community_spring.common.util.SimplePasswordEncoder;
+import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,18 +19,29 @@ import java.util.stream.IntStream;
 @RequestMapping("/api/dummy")
 public class PostDummyController {
 
-  @Autowired
+  private final SimpleEncrypt simpleEncrypt;
+
   private final PostRepository postRepository;
 
+
+  @Operation(summary = "게시글 더미 생성", description = "요청하는 size 만큼 게시글 더미를 생성하는 api 입니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post")
   public void createPost(@RequestBody Map<String, Integer> body) {
 
     Integer size = body.get("size");
     List<Post> list = IntStream.rangeClosed(1, size)
-            .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", SimplePasswordEncoder.encode("1234")))
+            .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", simpleEncrypt.encrypt("1234")))
             .collect(Collectors.toList());
 
     postRepository.saveAll(list);
+  }
+
+  @Operation(summary = "모든 게시글 삭제", description = "모든 게시글을 삭제하는 api 입니다.")
+  @ResponseStatus(HttpStatus.OK)
+  @DeleteMapping("/post")
+  public boolean deleteAllPost() {
+    postRepository.deleteAll();
+    return true;
   }
 }
