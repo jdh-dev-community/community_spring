@@ -56,7 +56,7 @@ public class PostServiceTest {
     public void 인풋이_유효한경우_db에저장() {
       CreateReqDto dto = new CreateReqDto("제목1", "내용", "카테고리", "작성자", "1234");
       Post entity = new Post();
-      when(postMapper.toEntity(dto)).thenReturn(entity);
+      when(postMapper.toEntity(dto, simpleEncrypt)).thenReturn(entity);
 
       postService.createPost(dto);
     }
@@ -64,7 +64,7 @@ public class PostServiceTest {
     @Test
     public void 인풋이_null인경우_InvalidDataAccessApiUsageException이발생() {
       CreateReqDto dto = null;
-      when(postMapper.toEntity(dto)).thenThrow(InvalidDataAccessApiUsageException.class);
+      when(postMapper.toEntity(dto, simpleEncrypt)).thenThrow(InvalidDataAccessApiUsageException.class);
       assertThrows(InvalidDataAccessApiUsageException.class,() -> postService.createPost(dto));
     }
   }
