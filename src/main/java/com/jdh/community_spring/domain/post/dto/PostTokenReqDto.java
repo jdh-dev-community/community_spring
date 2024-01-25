@@ -5,17 +5,20 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Getter
 @ToString
 @RequiredArgsConstructor
-public class PostAuthReqDto {
+public class PostTokenReqDto {
   @Schema(description = "게시글의 id", example = "1")
-  @NotBlank(message = "id는 필수값입니다.")
+  @Min(1)
   private final long postId;
 
   @Schema(description = "게시글의 비밀번호", example = "1234")
   @NotBlank(message = "비밀번호는 필수값입니다.")
+  @Size(min = 4)
   private final String password;
 }

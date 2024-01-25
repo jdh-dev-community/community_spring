@@ -3,8 +3,9 @@ package com.jdh.community_spring.domain.post.controller;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostAuthReqDto;
+import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
+import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -49,8 +50,8 @@ public class PostController {
   @Operation(summary = "게시글 비밀번호 인증", description = "게시글 수정과 삭제를 위한 토큰 발급 api 입니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post/token")
-  public String getAuthToken(@RequestBody PostAuthReqDto dto) {
-    String token = postService.generateToken(dto);
-    return token;
+  public PostTokenResDto getAuthToken(@Valid @RequestBody PostTokenReqDto dto) {
+    PostTokenResDto result = postService.generateToken(dto);
+    return result;
   }
 }
