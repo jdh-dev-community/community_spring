@@ -7,8 +7,9 @@ import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostAuthReqDto;
+import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
+import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -167,7 +167,7 @@ public class PostServiceTest {
   class GenerateToken {
     @Test
     public void 매칭되는_게시물이없는경우_NotFoundException발생() {
-      PostAuthReqDto dummyDto = new PostAuthReqDto(1000L, "1234");
+      PostTokenReqDto dummyDto = new PostTokenReqDto(1000L, "1234");
 
       when(postRepository.findById(dummyDto.getPostId())).thenThrow(NotFoundException.class);
       assertThrows(NotFoundException.class, () -> postService.generateToken(dummyDto));
@@ -175,7 +175,7 @@ public class PostServiceTest {
 
     @Test
     public void 비밀번호가_잘못된경우_IllegalArgumentException발생() {
-      PostAuthReqDto dummyDto = new PostAuthReqDto(1000L, "1234");
+      PostTokenReqDto dummyDto = new PostTokenReqDto(1000L, "1234");
       Post dummyPost = new Post("제목", "내용", "작성자", "카테고리", "비밀번호");
 
       when(postRepository.findById(dummyDto.getPostId())).thenReturn(Optional.ofNullable(dummyPost));
@@ -185,7 +185,7 @@ public class PostServiceTest {
 
     @Test
     public void 비밀번호가_일치하는경우_token반환() {
-      PostAuthReqDto dummyDto = new PostAuthReqDto(1000, "1234");
+      PostTokenReqDto dummyDto = new PostTokenReqDto(1000, "1234");
       Post dummyPost = new Post("제목", "내용", "작성자", "카테고리", "1234");
       String dummyToken = "Dummy Token";
 
@@ -193,10 +193,10 @@ public class PostServiceTest {
       when(simpleEncrypt.match(dummyDto.getPassword(), dummyPost.getPassword())).thenReturn(true);
       when(simpleEncrypt.encrypt(dummyDto.getPostId() + dummyDto.getPassword())).thenReturn(dummyToken);
 
-      String token = postService.generateToken(dummyDto);
+      PostTokenResDto result = postService.generateToken(dummyDto);
 
-      assertEquals(token, dummyToken);
-      verify(inMemoryDBProvider, times(1)).setTemperarily(eq(String.valueOf(dummyDto.getPostId())), eq(token), eq((long) 3 * 60));
+      assertEquals(result.getToken(), dummyToken);
+      verify(inMemoryDBProvider, times(1)).setTemperarily(eq(String.valueOf(dummyDto.getPostId())), eq(result.getToken()), eq((long) 3 * 60));
     }
 
 

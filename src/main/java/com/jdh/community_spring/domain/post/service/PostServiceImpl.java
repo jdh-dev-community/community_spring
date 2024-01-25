@@ -7,8 +7,9 @@ import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostAuthReqDto;
+import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
+import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
@@ -70,7 +71,8 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public String generateToken(PostAuthReqDto dto) {
+  public PostTokenResDto generateToken(PostTokenReqDto dto) {
+
     Optional<Post> optPost = postRepository.findById(dto.getPostId());
     Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + dto.getPostId() + "] 게시글이 존재하지 않습니다"));
     boolean isValidPassword = simpleEncrypt.match(dto.getPassword(), post.getPassword());
@@ -78,7 +80,7 @@ public class PostServiceImpl implements PostService {
     if (isValidPassword) {
       String token = simpleEncrypt.encrypt(dto.getPostId() + dto.getPassword());
       inMemoryDBProvider.setTemperarily(String.valueOf(dto.getPostId()), token, 3 * 60);
-      return token;
+      return new PostTokenResDto(token);
     } else {
       throw new IllegalArgumentException("잘못된 비밀번호입니다. 비밀번호를 확인해주세요");
     }
