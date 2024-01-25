@@ -13,7 +13,7 @@ public interface PostMapper {
   PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
 
   @Mapping(source = "content", target = "textContent")
-  Post toEntity(CreateReqDto dto);
+  Post toEntity(CreateReqDto dto, @Context SimpleEncrypt simpleEncrypt);
 
   @AfterMapping
   default void customMapping(@MappingTarget Post post, CreateReqDto dto, @Context SimpleEncrypt simpleEncrypt) {
