@@ -1,6 +1,6 @@
 package com.jdh.community_spring.domain.post.service.mapper;
 
-import com.jdh.community_spring.common.util.SimplePasswordEncoder;
+import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.dto.CreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
@@ -16,8 +16,8 @@ public interface PostMapper {
   Post toEntity(CreateReqDto dto);
 
   @AfterMapping
-  default void customMapping(@MappingTarget Post post, CreateReqDto dto) {
-    String hashedPassword = SimplePasswordEncoder.encode(dto.getPassword());
+  default void customMapping(@MappingTarget Post post, CreateReqDto dto, @Context SimpleEncrypt simpleEncrypt) {
+    String hashedPassword = simpleEncrypt.encrypt(dto.getPassword());
     post.setPassword(hashedPassword);
   }
 
