@@ -54,4 +54,13 @@ public class PostController {
     PostTokenResDto result = postService.generateToken(dto);
     return result;
   }
+
+  @Operation(summary = "게시글 삭제", description = "게시글 삭제 api 입니다.")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping("/post/{id}")
+  public void deletePost(@PathVariable String id) {
+    postService.deletePost(id);
+  }
+
+
 }

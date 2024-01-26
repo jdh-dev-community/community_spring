@@ -8,8 +8,9 @@ import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
 
 public interface PostService {
-  void createPost (CreateReqDto dto);
+  void createPost(CreateReqDto dto);
   ListResDto<PostResDto> getPostList(ListReqDto listReqDto);
   PostResDto getPost(String id);
   PostTokenResDto generateToken(PostTokenReqDto dto);
+  void deletePost(String id);
 }
