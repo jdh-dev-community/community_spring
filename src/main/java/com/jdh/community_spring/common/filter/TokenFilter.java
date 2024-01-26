@@ -27,7 +27,7 @@ public class TokenFilter implements Filter {
 
     switch (method.toUpperCase()) {
       case "DELETE":
-      case "PATCH":
+      case "PUT":
         if (!isValidToken(httpRequest, httpResponse)) {
           httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "유효하지 않은 토큰입니다.");
           return;

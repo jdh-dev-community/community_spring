@@ -2,10 +2,7 @@ package com.jdh.community_spring.domain.post.service.interfaces;
 
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.dto.PostCreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
-import com.jdh.community_spring.domain.post.dto.PostResDto;
-import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
+import com.jdh.community_spring.domain.post.dto.*;
 
 public interface PostService {
   void createPost(PostCreateReqDto dto);
@@ -13,4 +10,5 @@ public interface PostService {
   PostResDto getPost(String id);
   PostTokenResDto generateToken(PostTokenReqDto dto);
   void deletePost(String id);
+  PostResDto editPost(String id, PostEditReqDto dto);
 }
