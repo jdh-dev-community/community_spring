@@ -6,7 +6,7 @@ import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.dto.CreateReqDto;
+import com.jdh.community_spring.domain.post.dto.PostCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
@@ -38,7 +38,7 @@ public class PostServiceImpl implements PostService {
 
 
   @Override
-  public void createPost(CreateReqDto dto) {
+  public void createPost(PostCreateReqDto dto) {
     try {
       Post post = postMapper.toEntity(dto, simpleEncrypt);
       postRepository.save(post);
