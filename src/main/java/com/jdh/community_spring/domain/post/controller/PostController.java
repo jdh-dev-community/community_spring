@@ -2,10 +2,7 @@ package com.jdh.community_spring.domain.post.controller;
 
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.dto.CreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
-import com.jdh.community_spring.domain.post.dto.PostResDto;
-import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
+import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +23,7 @@ public class PostController {
   @Operation(summary = "게시글 생성", description = "제목, 내용, 작성자, 카테고리를 포함하는 게시글을 작성합니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post")
-  public void createPost(@Valid @RequestBody CreateReqDto dto) {
+  public void createPost(@Valid @RequestBody PostCreateReqDto dto) {
     postService.createPost(dto);
   }
 
@@ -60,6 +57,14 @@ public class PostController {
   @DeleteMapping("/post/{id}")
   public void deletePost(@PathVariable String id) {
     postService.deletePost(id);
+  }
+
+  @Operation(summary = "게시글 수정", description = "게시글 수정 api 입니다.")
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/post/{id}")
+  public PostResDto editPost(@PathVariable String id, @Valid @RequestBody PostEditReqDto dto) {
+    PostResDto result = postService.editPost(id, dto);
+    return result;
   }
 
 

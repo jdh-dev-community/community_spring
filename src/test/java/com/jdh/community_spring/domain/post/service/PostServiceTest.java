@@ -6,7 +6,7 @@ import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.dto.CreateReqDto;
+import com.jdh.community_spring.domain.post.dto.PostCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
@@ -54,7 +54,7 @@ public class PostServiceTest {
   class CreatePost {
     @Test
     public void 인풋이_유효한경우_db에저장() {
-      CreateReqDto dto = new CreateReqDto("제목1", "내용", "카테고리", "작성자", "1234");
+      PostCreateReqDto dto = new PostCreateReqDto("제목1", "내용", "카테고리", "작성자", "1234");
       Post entity = new Post();
       when(postMapper.toEntity(dto, simpleEncrypt)).thenReturn(entity);
 
@@ -63,7 +63,7 @@ public class PostServiceTest {
 
     @Test
     public void 인풋이_null인경우_InvalidDataAccessApiUsageException이발생() {
-      CreateReqDto dto = null;
+      PostCreateReqDto dto = null;
       when(postMapper.toEntity(dto, simpleEncrypt)).thenThrow(InvalidDataAccessApiUsageException.class);
       assertThrows(InvalidDataAccessApiUsageException.class,() -> postService.createPost(dto));
     }

@@ -6,10 +6,7 @@ import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.dto.CreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostTokenReqDto;
-import com.jdh.community_spring.domain.post.dto.PostResDto;
-import com.jdh.community_spring.domain.post.dto.PostTokenResDto;
+import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
@@ -38,7 +35,7 @@ public class PostServiceImpl implements PostService {
 
 
   @Override
-  public void createPost(CreateReqDto dto) {
+  public void createPost(PostCreateReqDto dto) {
     try {
       Post post = postMapper.toEntity(dto, simpleEncrypt);
       postRepository.save(post);
@@ -89,6 +86,25 @@ public class PostServiceImpl implements PostService {
   @Override
   public void deletePost(String id) {
     postRepository.deleteById(Long.parseLong(id));
+  }
+
+  @Override
+  public PostResDto editPost(String id, PostEditReqDto dto) {
+    long postId = Long.parseLong(id);
+    Optional<Post> optPost = postRepository.findById(postId);
+    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+
+    // TODO: mapper 사용하기
+    post.setTitle(dto.getTitle());
+    post.setTextContent(dto.getContent());
+    post.setCategory(dto.getCategory());
+    post.setCreator(dto.getCreator());
+
+    // TODO: save와 dirty check 쿼리 비교하기
+    postRepository.save(post);
+
+    PostResDto result = postMapper.toPostResDto(post);
+    return result;
   }
 }
 
