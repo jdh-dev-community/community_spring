@@ -85,6 +85,11 @@ public class PostServiceImpl implements PostService {
       throw new IllegalArgumentException("잘못된 비밀번호입니다. 비밀번호를 확인해주세요");
     }
   }
+
+  @Override
+  public void deletePost(String id) {
+    postRepository.deleteById(Long.parseLong(id));
+  }
 }
 
 
