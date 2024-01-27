@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class PostResDto {
 
   @Schema(description = "게시글의 id", example = "1")
@@ -39,4 +40,6 @@ public class PostResDto {
 
   @Schema(description = "게시글의 생성일자", example = "2023-01-01T12:00:00")
   private LocalDateTime createdAt;
+
+
 }
