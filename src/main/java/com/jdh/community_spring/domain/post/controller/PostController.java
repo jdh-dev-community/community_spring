@@ -23,8 +23,9 @@ public class PostController {
   @Operation(summary = "게시글 생성", description = "제목, 내용, 작성자, 카테고리를 포함하는 게시글을 작성합니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post")
-  public void createPost(@Valid @RequestBody PostCreateReqDto dto) {
-    postService.createPost(dto);
+  public PostResDto createPost(@Valid @RequestBody PostCreateReqDto dto) {
+    PostResDto result = postService.createPost(dto);
+    return result;
   }
 
   @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")

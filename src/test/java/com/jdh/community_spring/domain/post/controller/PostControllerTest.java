@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.dto.ListResDto;
+import com.jdh.community_spring.domain.post.dto.PostCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import org.hamcrest.Matchers;
@@ -55,8 +56,14 @@ public class PostControllerTest {
     @Test
     public void 요청의_Body가_유효할경우_201응답() throws Exception {
       String requestBody = createDummyBody(null);
+      int postId = 1;
+
+      PostResDto resDto = new PostResDto(postId, "제목", "컨텐츠", "카테고리", "작성자", 0, LocalDateTime.now());
+      when(postService.createPost(any(PostCreateReqDto.class))).thenReturn(resDto);
+
       postAndVerify(requestBody)
-              .andExpect(status().isCreated());
+              .andExpect(status().isCreated())
+              .andExpect(jsonPath("$.postId", Matchers.equalTo(postId)));
     }
 
     @Test

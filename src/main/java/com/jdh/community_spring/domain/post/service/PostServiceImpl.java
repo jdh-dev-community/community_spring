@@ -35,10 +35,11 @@ public class PostServiceImpl implements PostService {
 
 
   @Override
-  public void createPost(PostCreateReqDto dto) {
+  public PostResDto createPost(PostCreateReqDto dto) {
     try {
       Post post = postMapper.toEntity(dto, simpleEncrypt);
-      postRepository.save(post);
+      Post savedPost = postRepository.save(post);
+      return postMapper.toPostResDto(savedPost);
     } catch (Exception ex) {
       log.error("입력값: {}, 메세지: {}",dto, ex.getMessage());
       throw ex;
