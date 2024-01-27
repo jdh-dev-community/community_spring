@@ -40,7 +40,9 @@ public class PostController {
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}")
   public PostResDto getPost(@PathVariable String id) {
-    PostResDto post = postService.getPost(id);
+
+    long postId = Long.parseLong(id);
+    PostResDto post = postService.getPost(postId);
 
     return post;
   }
