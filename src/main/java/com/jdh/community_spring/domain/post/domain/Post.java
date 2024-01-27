@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 
 @Data
@@ -51,6 +52,9 @@ public class Post extends BaseEntity {
   @Schema(description = "최소 4자리를 사용하는 게시글의 비밀번호", example = "1234")
   @Column(name = "password", nullable = false)
   private String password;
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> comments;
 
   public Post(String title, String textContent, String creator, String category, String password) {
     this.title = title;
