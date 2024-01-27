@@ -8,6 +8,9 @@ import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CommentMapper {
   CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
@@ -28,7 +31,7 @@ public interface CommentMapper {
 
   @AfterMapping
   default void customMapping(@MappingTarget CommentResDto result, Comment entity) {
-    Long parentId = entity.getParentComment() != null? entity.getParentComment().getCommentId() : null;
-    result.setParentId(parentId);
+    List<CommentResDto> list = entity.getChildComments().stream().map(INSTANCE::toCommentResDto).collect(Collectors.toList());
+    result.setChildren(list);
   }
 }

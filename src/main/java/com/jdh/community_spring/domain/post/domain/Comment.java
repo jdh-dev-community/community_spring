@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,6 +40,10 @@ public class Comment extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "parent_id")
   private Comment parentComment;
+
+  @Schema(description = "자식 댓글")
+  @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> childComments = new ArrayList<>();
 
 
   @Schema(description = "댓글이 작성된 게시글 정보")
