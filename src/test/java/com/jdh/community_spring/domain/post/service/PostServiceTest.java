@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -117,7 +118,7 @@ public class PostServiceTest {
     private Page<Post> createDummy(Pageable pageable, int totalElements) {
       String HashedPassword = "Fake Hashed";
       List<Post> list = IntStream.rangeClosed(1, pageable.getPageSize())
-              .mapToObj((i) -> new Post(i, "title" + i, "text", "creator", "category", 0, HashedPassword))
+              .mapToObj((i) -> new Post(i, "title" + i, "text", "creator", "category", 0, HashedPassword, null))
               .collect(Collectors.toList());
 
       return new PageImpl<>(list, pageable, totalElements);
@@ -131,34 +132,28 @@ public class PostServiceTest {
 
     @Test
     public void 인풋이_long타입으로변환되고_매치되는게시글이있다면_PostResDto반환() {
-      String validId = "353";
-      long id = Long.parseLong(validId);
+      long validId = 353;
 
-      Post dummyPost = new Post(id,"제목", "컨텐츠", "작성자", "카테고리", 10, simpleEncrypt.encrypt("1234"));
-      PostResDto dummyResult = new PostResDto(id, "제목", "컨텐츠", "작성자", "카테고리", 10, dummyPost.getCreatedAt());
+      Post dummyPost = new Post(validId,"제목", "컨텐츠", "작성자", "카테고리", 10, simpleEncrypt.encrypt("1234"), null);
+      PostResDto dummyResult = new PostResDto(validId, "제목", "컨텐츠", "작성자", "카테고리", 10, dummyPost.getCreatedAt());
 
-      when(postRepository.findById(id)).thenReturn(Optional.of(dummyPost));
+      when(postRepository.findById(validId)).thenReturn(Optional.of(dummyPost));
       when(postMapper.toPostResDto(dummyPost)).thenReturn(dummyResult);
 
       PostResDto result = postService.getPost(validId);
 
-      assertThat(result.getPostId()).isEqualTo(id);
+      assertThat(result.getPostId()).isEqualTo(validId);
     }
 
     @Test
-    public void 인풋이_long타입으로변환되지만_매치되는게시글이없다면_NotFound예외발생() {
-      String notMatchedId = "10000";
-      long id = Long.parseLong(notMatchedId);
+    public void 입력된Id와_매치되는게시글이없다면_NotFound예외발생() {
+      long notMatchedId = 10000;
 
-      when(postRepository.findById(id)).thenReturn(Optional.empty());
+      when(postRepository.findById(notMatchedId)).thenReturn(Optional.empty());
       assertThrows(NotFoundException.class, () -> postService.getPost(notMatchedId));
     }
 
-    @Test
-    public void 인풋이_long타입으로변환되지않는경우_NumberForMatException발생() {
-      String invalidId = "a";
-      assertThrows(NumberFormatException.class, () -> postService.getPost(invalidId));
-    }
+
   }
 
 

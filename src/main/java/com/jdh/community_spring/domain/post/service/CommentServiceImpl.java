@@ -11,7 +11,6 @@ import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
 import com.jdh.community_spring.domain.post.service.mapper.CommentMapper;
-import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

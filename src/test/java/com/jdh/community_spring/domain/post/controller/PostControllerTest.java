@@ -45,7 +45,6 @@ public class PostControllerTest {
   private PostService postService;
 
 
-
   private final String baseUrl = "/api/v1";
 
   @DisplayName("게시글 생성")
@@ -160,7 +159,7 @@ public class PostControllerTest {
 
     private ListResDto<PostResDto> createDummy(int size, int totalElements) {
       List<PostResDto> list = IntStream.rangeClosed(1, size)
-              .mapToObj((i) -> new PostResDto(i,"제목" + i, "이건 더미 데이터", "테스트", "테스트", 0,LocalDateTime.now()))
+              .mapToObj((i) -> new PostResDto(i, "제목" + i, "이건 더미 데이터", "테스트", "테스트", 0, LocalDateTime.now()))
               .collect(Collectors.toList());
 
       return new ListResDto<>(totalElements, list);
@@ -175,20 +174,20 @@ public class PostControllerTest {
 
     @Test
     public void 요청에_유효한id포함시_성공응답반환() throws Exception {
-      String validId = "1";
+      long validId = 1;
 
       when(postService.getPost(validId)).thenReturn(createDummyPost(validId));
 
       mockMvc.perform(get(url + "/" + validId))
               .andExpect(status().isOk())
-              .andExpect(jsonPath("$.postId", Matchers.equalTo(Integer.parseInt(validId))));
+              .andExpect(jsonPath("$.postId", Matchers.equalTo(validId)));
     }
 
     @Test
     public void 요청에_유효하지않은id포함시_400응답반환() throws Exception {
       String validId = "invalidId";
 
-      when(postService.getPost(String.valueOf(validId))).thenThrow(IllegalArgumentException.class);
+      when(postService.getPost(Long.parseLong(validId))).thenThrow(IllegalArgumentException.class);
 
       mockMvc.perform(get(url + "/" + validId))
               .andExpect(status().isBadRequest());
@@ -198,24 +197,15 @@ public class PostControllerTest {
     public void 요청에_포함된id에_매칭되는게시글이없을시_404응답반환() throws Exception {
       String notMatchedId = "1000000";
 
-      when(postService.getPost(String.valueOf(notMatchedId))).thenThrow(NotFoundException.class);
+      when(postService.getPost(Long.parseLong(notMatchedId))).thenThrow(NotFoundException.class);
 
       mockMvc.perform(get(url + "/" + notMatchedId))
               .andExpect(status().isNotFound());
     }
 
 
-    private PostResDto createDummyPost(String postId) throws JsonProcessingException {
-      PostResDto dto = new PostResDto(
-              Long.parseLong(postId),
-              "t",
-              "t",
-              "t",
-              "2",
-              1,
-              LocalDateTime.now()
-      );
-
+    private PostResDto createDummyPost(long postId) throws JsonProcessingException {
+      PostResDto dto = new PostResDto(postId, "t", "t", "t", "2", 1, LocalDateTime.now());
       return dto;
     }
 
