@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 
 @Data
@@ -25,32 +26,35 @@ public class Post extends BaseEntity {
   private long postId;
 
   @Schema(description = "게시글의 제목", example = "Why this error occurs?")
-  @Column(name = "title")
+  @Column(name = "title", nullable = false)
   private String title;
 
   @Schema(description = "게시글의 내용", example = "When I start my server, the error below shows")
-  @Column(name = "text_content")
+  @Column(name = "text_content", nullable = false, columnDefinition = "TEXT" )
   private String textContent;
 
 
   @Schema(description = "게시글의 작성자", example = "jack")
   // TODO: 유저 테이블 생성 후 맵핑
-  @Column(name = "creator")
+  @Column(name = "creator", nullable = false)
   private String creator;
 
 
   @Schema(description = "게시글의 카테고리", example = "질문, 홍보, 상담")
   // TODO: 카테고리 정리 후 테이블로 생성
-  @Column(name = "category")
+  @Column(name = "category", nullable = false)
   private String category;
 
   @Schema(description = "게시글의 조회수", example = "100")
-  @Column(name = "view_count")
-  private int viewCount;
+  @Column(name = "view_count", nullable = false)
+  private long viewCount;
 
   @Schema(description = "최소 4자리를 사용하는 게시글의 비밀번호", example = "1234")
-  @Column(name = "password")
+  @Column(name = "password", nullable = false)
   private String password;
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Comment> comments;
 
   public Post(String title, String textContent, String creator, String category, String password) {
     this.title = title;
