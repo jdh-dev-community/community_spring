@@ -5,9 +5,8 @@ on:
     branches:
       - '*'
 
-
 jobs:
-  build:
+  build_before_pr:
     environment: dev
     runs-on: ubuntu-latest
     permissions:
