@@ -30,10 +30,10 @@ public class ListReqDto {
   @Min(value = 1, message = "size 최소 1 이상이어야 합니다.")
   private int size = 10;
 
-  @Schema(description = "정렬 기준, 기본은 최신순 정렬입니다.", example = "recent", allowableValues = {"popular", "recent"})
+  @Schema(description = "정렬 기준, 기본은 최신순 정렬입니다.", example = "recent/popular")
   private SortBy sortBy = SortBy.RECENT;
 
-  @Schema(description = "오름차순/내림차순, 기본은 내림차순 정렬이빈다.", example = "desc", allowableValues = {"popular", "recent"})
+  @Schema(description = "오름차순/내림차순, 기본은 내림차순 정렬입니다.", example = "desc/asc")
   private OrderBy orderBy = OrderBy.DESC;
 
   public void setSortBy(String sortBy) {
