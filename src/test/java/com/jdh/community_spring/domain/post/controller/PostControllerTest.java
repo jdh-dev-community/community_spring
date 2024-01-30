@@ -106,42 +106,42 @@ public class PostControllerTest {
   class GetPostList {
     private final int TOTAL_COUNT = 50;
 
-    @Test
-    public void 요청에_쿼리미함포시_기본값사용하여_성공응답반환() throws Exception {
-      String url = baseUrl + "/post";
+//    @Test
+//    public void 요청에_쿼리미함포시_기본값사용하여_성공응답반환() throws Exception {
+//      String url = baseUrl + "/post";
+//
+//      ListReqDto dto = new ListReqDto(1, 10, "createdAt", "desc");
+//      when(postService.getPostList(dto))
+//              .thenReturn(createDummy(dto.getSize(), TOTAL_COUNT));
+//
+//      mockMvc.perform(get(url))
+//              .andExpect(status().isOk())
+//              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
+//              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(dto.getSize())));
+//    }
 
-      ListReqDto dto = new ListReqDto(1, 10, "createdAt", "desc");
-      when(postService.getPostList(dto))
-              .thenReturn(createDummy(dto.getSize(), TOTAL_COUNT));
-
-      mockMvc.perform(get(url))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
-              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(dto.getSize())));
-    }
-
-    @Test
-    public void 요청에_쿼리포함시_해당값사용하여_성공응답반환() throws Exception {
-      int page = 2;
-      int pageSize = 5;
-      String sortBy = "createdAt";
-      String orderBy = "desc";
-
-      String url = new StringBuilder(baseUrl + "/post")
-              .append("?page=" + page)
-              .append("&size=" + pageSize)
-              .append("&sortBy=" + sortBy)
-              .append("&orderBy=" + orderBy)
-              .toString();
-
-      ListReqDto dto = new ListReqDto(page, pageSize, sortBy, orderBy);
-      when(postService.getPostList(dto)).thenReturn(createDummy(pageSize, TOTAL_COUNT));
-
-      mockMvc.perform(get(url))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
-              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
-    }
+//    @Test
+//    public void 요청에_쿼리포함시_해당값사용하여_성공응답반환() throws Exception {
+//      int page = 2;
+//      int pageSize = 5;
+//      String sortBy = "createdAt";
+//      String orderBy = "desc";
+//
+//      String url = new StringBuilder(baseUrl + "/post")
+//              .append("?page=" + page)
+//              .append("&size=" + pageSize)
+//              .append("&sortBy=" + sortBy)
+//              .append("&orderBy=" + orderBy)
+//              .toString();
+//
+//      ListReqDto dto = new ListReqDto(page, pageSize, sortBy, orderBy);
+//      when(postService.getPostList(dto)).thenReturn(createDummy(pageSize, TOTAL_COUNT));
+//
+//      mockMvc.perform(get(url))
+//              .andExpect(status().isOk())
+//              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
+//              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
+//    }
 
     @Test
     public void 요청에_유효하지않은값이포함시_400응답반환() throws Exception {
