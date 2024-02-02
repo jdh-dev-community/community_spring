@@ -66,38 +66,9 @@ public class PostServiceImpl implements PostService {
   }
 
 
-
+  @Transactional
   @Override
   public PostResDto getPost(long postId) {
-    Optional<Post> optPost = postRepository.findById(postId);
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
-    post.setViewCount(post.getViewCount() + 1);
-    postRepository.save(post);
-
-    PostResDto postResDto = new PostResDto();
-    postResDto.setPostId(post.getPostId());
-    postResDto.setTitle(post.getTitle());
-    postResDto.setContent(post.getTextContent());
-    postResDto.setCategory(post.getCategory());
-    postResDto.setViewCount(post.getViewCount());
-    postResDto.setCreator(post.getCreator());
-    postResDto.setCreatedAt(post.getCreatedAt());
-
-    List<Comment> list = post.getComments();
-    List<CommentResDto> comments = list.stream()
-            .map((c) -> commentMapper.toCommentResDto(c))
-            .collect(Collectors.toList());
-
-    postResDto.setComments(comments);
-
-    return postResDto;
-  }
-
-
-
-  // MAP: getPost
-  @Transactional
-  public PostResDto getPost_Test(long postId) {
     Optional<Post> optPost = postRepository.findByIdInPessimisticWrite(postId);
     Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
     post.setViewCount(post.getViewCount() + 1);
