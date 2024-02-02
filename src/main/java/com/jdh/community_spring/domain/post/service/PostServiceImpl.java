@@ -83,12 +83,12 @@ public class PostServiceImpl implements PostService {
     postResDto.setCreator(post.getCreator());
     postResDto.setCreatedAt(post.getCreatedAt());
 
-//    List<Comment> list = post.getComments();
-//    List<CommentResDto> comments = list.stream()
-//            .map((c) -> commentMapper.toCommentResDto(c))
-//            .collect(Collectors.toList());
+    List<Comment> list = post.getComments();
+    List<CommentResDto> comments = list.stream()
+            .map((c) -> commentMapper.toCommentResDto(c))
+            .collect(Collectors.toList());
 
-//    postResDto.setComments(comments);
+    postResDto.setComments(comments);
 
     return postResDto;
   }
