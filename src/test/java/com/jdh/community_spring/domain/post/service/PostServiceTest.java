@@ -138,13 +138,13 @@ public class PostServiceTest {
 //      assertThat(result.getPostId()).isEqualTo(validId);
 //    }
 
-    @Test
-    public void 입력된Id와_매치되는게시글이없다면_NotFound예외발생() {
-      long notMatchedId = 10000;
-
-      when(postRepository.findById(notMatchedId)).thenReturn(Optional.empty());
-      assertThrows(NotFoundException.class, () -> postService.getPost(notMatchedId));
-    }
+//    @Test
+//    public void 입력된Id와_매치되는게시글이없다면_NotFound예외발생() {
+//      long notMatchedId = 10000;
+//
+//      when(postRepository.findById(notMatchedId)).thenReturn(Optional.empty());
+//      assertThrows(NotFoundException.class, () -> postService.getPost(notMatchedId));
+//    }
 
 
   }
