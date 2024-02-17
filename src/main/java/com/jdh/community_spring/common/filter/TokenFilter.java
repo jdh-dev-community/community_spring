@@ -33,7 +33,7 @@ public class TokenFilter implements Filter {
           return;
         }
       default:
-        log.info("pass auth filter: {}" , httpRequest.getRequestURI());
+        log.info("[Filter] Pass auth filter: {}" , httpRequest.getRequestURI());
         chain.doFilter(request, response);
     }
 
