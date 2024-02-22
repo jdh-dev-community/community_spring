@@ -10,18 +10,14 @@ import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
-import com.jdh.community_spring.domain.post.service.mapper.CommentMapper;
-import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,24 +29,34 @@ public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
 
-  private final PostMapper postMapper;
-
   private final InMemoryDBProvider inMemoryDBProvider;
 
   private final SimpleEncrypt simpleEncrypt;
 
-  private final CommentMapper commentMapper;
-  
   @Override
   public PostResDto createPost(PostCreateReqDto dto) {
     try {
-      Post post = postMapper.toEntity(dto, simpleEncrypt);
+      Post post = createPostEntity(dto);
       Post savedPost = postRepository.save(post);
-      return postMapper.toPostResDto(savedPost);
+      return createPostResDto(savedPost);
     } catch (Exception ex) {
-      log.error("입력값: {}, 메세지: {}",dto, ex.getMessage());
+      log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
       throw ex;
     }
+  }
+
+
+
+  private Post createPostEntity(PostCreateReqDto dto) {
+    String hashedPassword = simpleEncrypt.encrypt(dto.getPassword());
+    return Post.builder()
+            .title(dto.getTitle())
+            .textContent(dto.getContent())
+            .creator(dto.getCreator())
+            .category(dto.getCategory())
+            .viewCount(0)
+            .password(hashedPassword)
+            .build();
   }
 
   @Override
@@ -58,12 +64,55 @@ public class PostServiceImpl implements PostService {
     Pageable pageable = listReqDto.toPageable();
 
     Page<Post> page = postRepository.findAll(pageable);
-    List<PostResDto> dto = page.getContent().stream()
-            .map(postMapper::toPostResDto)
+    List<PostResDto> dto = page.getContent()
+            .stream()
+            .map(this::createPostResDto)
             .collect(Collectors.toList());
 
     return new ListResDto<>(page.getTotalElements(), dto);
   }
+
+  private PostResDto createPostResDto(Post post) {
+    List<Comment> commentList = post.getComments() != null ? post.getComments() : new ArrayList<>();
+
+    List<CommentResDto> comments = commentList
+            .stream()
+            .map(this::createComment).collect(Collectors.toList());
+    return PostResDto.builder()
+            .postId(post.getPostId())
+            .title(post.getTitle())
+            .content(post.getTextContent())
+            .category(post.getCategory())
+            .creator(post.getCreator())
+            .viewCount(post.getViewCount())
+            .comments(comments)
+            .createdAt(post.getCreatedAt())
+            .build();
+  }
+
+  private CommentResDto createComment(Comment comment) {
+    List<CommentResDto> children = comment.getChildComments()
+            .stream()
+            .map(this::createReComment).collect(Collectors.toList());
+
+    return CommentResDto.builder().commentId(comment.getCommentId())
+            .content(comment.getContent())
+            .creator(comment.getCreator())
+            .createdAt(comment.getCreatedAt())
+            .children(children)
+            .build();
+  }
+
+  private CommentResDto createReComment(Comment comment) {
+    return CommentResDto.builder()
+            .commentId(comment.getCommentId())
+            .content(comment.getContent())
+            .creator(comment.getCreator())
+            .createdAt(comment.getCreatedAt())
+            .build();
+  }
+
+
 
 
   @Transactional
@@ -85,7 +134,7 @@ public class PostServiceImpl implements PostService {
 
     List<Comment> list = post.getComments();
     List<CommentResDto> comments = list.stream()
-            .map((c) -> commentMapper.toCommentResDto(c))
+            .map(this::createComment)
             .collect(Collectors.toList());
 
     postResDto.setComments(comments);
@@ -129,7 +178,7 @@ public class PostServiceImpl implements PostService {
     // TODO: save와 dirty check 쿼리 비교하기
     postRepository.save(post);
 
-    PostResDto result = postMapper.toPostResDto(post);
+    PostResDto result = createPostResDto(post);
     return result;
   }
 }

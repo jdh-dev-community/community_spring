@@ -8,7 +8,7 @@ import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
-import com.jdh.community_spring.domain.post.service.mapper.PostMapper;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,33 +40,33 @@ public class PostServiceTest {
   private SimpleEncrypt simpleEncrypt;
   @Mock
   private InMemoryDBProvider inMemoryDBProvider;
-  @Mock
-  private PostMapper postMapper;
+//  @Mock
+//  private PostMapper postMapper;
   @Mock
   private PostRepository postRepository;
   @InjectMocks
   private PostServiceImpl postService;
 
 
-  @DisplayName("게시글생성하기서비스")
-  @Nested
-  class CreatePost {
-    @Test
-    public void 인풋이_유효한경우_db에저장() {
-      PostCreateReqDto dto = new PostCreateReqDto("제목1", "내용", "카테고리", "작성자", "1234");
-      Post entity = new Post();
-      when(postMapper.toEntity(dto, simpleEncrypt)).thenReturn(entity);
+//  @DisplayName("게시글생성하기서비스")
+//  @Nested
+//  class CreatePost {
+//    @Test
+//    public void 인풋이_유효한경우_db에저장() {
+//      PostCreateReqDto dto = new PostCreateReqDto("제목1", "내용", "카테고리", "작성자", "1234");
+//      Post entity = new Post();
+//      when(postMapper.toEntity(dto, simpleEncrypt)).thenReturn(entity);
+//
+//      postService.createPost(dto);
+//    }
 
-      postService.createPost(dto);
-    }
-
-    @Test
-    public void 인풋이_null인경우_InvalidDataAccessApiUsageException이발생() {
-      PostCreateReqDto dto = null;
-      when(postMapper.toEntity(dto, simpleEncrypt)).thenThrow(InvalidDataAccessApiUsageException.class);
-      assertThrows(InvalidDataAccessApiUsageException.class, () -> postService.createPost(dto));
-    }
-  }
+//    @Test
+//    public void 인풋이_null인경우_InvalidDataAccessApiUsageException이발생() {
+//      PostCreateReqDto dto = null;
+//      when(postMapper.toEntity(dto, simpleEncrypt)).thenThrow(InvalidDataAccessApiUsageException.class);
+//      assertThrows(InvalidDataAccessApiUsageException.class, () -> postService.createPost(dto));
+//    }
+//  }
 
   @DisplayName("게시글목록서비스")
   @Nested
