@@ -48,12 +48,13 @@ public class PostServiceImpl implements PostService {
 
 
   private Post createPostEntity(PostCreateReqDto dto) {
+
     String hashedPassword = simpleEncrypt.encrypt(dto.getPassword());
     return Post.builder()
             .title(dto.getTitle())
             .textContent(dto.getContent())
             .creator(dto.getCreator())
-            .category(dto.getCategory())
+            .category(dto.getCategory().getCategory())
             .viewCount(0)
             .password(hashedPassword)
             .build();
@@ -78,6 +79,9 @@ public class PostServiceImpl implements PostService {
     List<CommentResDto> comments = commentList
             .stream()
             .map(this::createComment).collect(Collectors.toList());
+
+
+
     return PostResDto.builder()
             .postId(post.getPostId())
             .title(post.getTitle())
@@ -123,14 +127,15 @@ public class PostServiceImpl implements PostService {
     post.setViewCount(post.getViewCount() + 1);
     postRepository.save(post);
 
-    PostResDto postResDto = new PostResDto();
-    postResDto.setPostId(post.getPostId());
-    postResDto.setTitle(post.getTitle());
-    postResDto.setContent(post.getTextContent());
-    postResDto.setCategory(post.getCategory());
-    postResDto.setViewCount(post.getViewCount());
-    postResDto.setCreator(post.getCreator());
-    postResDto.setCreatedAt(post.getCreatedAt());
+    PostResDto postResDto = PostResDto.builder()
+            .postId(post.getPostId())
+            .title(post.getTitle())
+            .content(post.getTextContent())
+            .category(post.getCategory())
+            .viewCount(post.getViewCount())
+            .creator(post.getCreator())
+            .createdAt(post.getCreatedAt())
+            .build();
 
     List<Comment> list = post.getComments();
     List<CommentResDto> comments = list.stream()

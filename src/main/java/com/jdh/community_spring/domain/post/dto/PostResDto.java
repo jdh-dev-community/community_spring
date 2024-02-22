@@ -1,5 +1,6 @@
 package com.jdh.community_spring.domain.post.dto;
 
+import com.jdh.community_spring.common.constant.PostCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -12,9 +13,8 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-@Builder
+
 @NoArgsConstructor
-@AllArgsConstructor
 public class PostResDto {
 
   @Schema(description = "게시글의 id", example = "1")
@@ -27,7 +27,7 @@ public class PostResDto {
   private String content;
 
   @Schema(description = "게시글의 카테고리", example = "질문, 홍보, 상담")
-  private String category;
+  private PostCategory category;
 
   @Schema(description = "게시글의 작성자", example = "jack")
   private String creator;
@@ -42,5 +42,19 @@ public class PostResDto {
   @Schema(description = "게시글의 생성일자", example = "2023-01-01T12:00:00")
   private LocalDateTime createdAt;
 
+  @Builder
+  public PostResDto(long postId, String title, String content, String category, String creator, long viewCount, List<CommentResDto> comments, LocalDateTime createdAt) {
+    this.postId = postId;
+    this.title = title;
+    this.content = content;
+    this.creator = creator;
+    this.viewCount = viewCount;
+    this.comments = comments;
+    this.createdAt = createdAt;
+    this.category = PostCategory.match(category);
+  }
 
+  public String getCategory() {
+    return category.getCategory();
+  }
 }

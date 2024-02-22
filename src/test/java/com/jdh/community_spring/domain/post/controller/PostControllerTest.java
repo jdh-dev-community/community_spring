@@ -59,7 +59,7 @@ public class PostControllerTest {
       String requestBody = createDummyBody(null);
       int postId = 1;
       List<CommentResDto> list = new ArrayList<>();
-      PostResDto resDto = new PostResDto(postId, "제목", "컨텐츠", "카테고리", "작성자", 0, list, LocalDateTime.now());
+      PostResDto resDto = new PostResDto(postId, "제목", "컨텐츠", "question", "작성자", 0, list, LocalDateTime.now());
       when(postService.createPost(any(PostCreateReqDto.class))).thenReturn(resDto);
 
       postAndVerify(requestBody)
@@ -90,7 +90,7 @@ public class PostControllerTest {
       Map<String, String> dummy = new HashMap<>();
       dummy.put("title", "제목");
       dummy.put("content", "내용");
-      dummy.put("category", "카테고리");
+      dummy.put("category", "question");
       dummy.put("creator", "생성자");
       dummy.put("password", "1234");
 
