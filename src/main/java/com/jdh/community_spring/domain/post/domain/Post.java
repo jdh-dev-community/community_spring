@@ -2,15 +2,13 @@ package com.jdh.community_spring.domain.post.domain;
 
 import com.jdh.community_spring.common.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
 
+@Builder
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor

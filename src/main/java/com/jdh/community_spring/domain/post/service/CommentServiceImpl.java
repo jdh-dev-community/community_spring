@@ -10,13 +10,14 @@ import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
-import com.jdh.community_spring.domain.post.service.mapper.CommentMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -27,8 +28,6 @@ public class CommentServiceImpl implements CommentService {
   private final CommentRepository commentRepository;
 
   private final PostRepository postRepository;
-
-  private final CommentMapper commentMapper;
 
   private final SimpleEncrypt simpleEncrypt;
 
@@ -46,12 +45,43 @@ public class CommentServiceImpl implements CommentService {
     }
 
     try {
-      Comment comment = commentMapper.toEntity(dto, simpleEncrypt, post, parentComment);
+      Comment comment = createComment(dto, parentComment);
       Comment savedComment = commentRepository.save(comment);
-      return commentMapper.toCommentResDto(savedComment);
+      return createCommentResDto(savedComment);
     } catch (Exception ex) {
       log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
       throw ex;
     }
+  }
+
+
+  private Comment createComment(CommentCreateReqDto dto, Comment parent) {
+    String hashedPassword = simpleEncrypt.encrypt(dto.getPassword());
+    return Comment.builder()
+            .content(dto.getContent())
+            .creator(dto.getCreator())
+            .password(hashedPassword)
+            .parentComment(parent)
+            .build();
+  }
+  private CommentResDto createCommentResDto(Comment comment) {
+    List<CommentResDto> recomments = comment.getChildComments().stream().map(this::createReCommentResDto).collect(Collectors.toList());
+
+    return CommentResDto.builder()
+            .commentId(comment.getCommentId())
+            .content(comment.getContent())
+            .creator(comment.getCreator())
+            .createdAt(comment.getCreatedAt())
+            .children(recomments)
+            .build();
+  }
+
+  private CommentResDto createReCommentResDto(Comment comment) {
+    return CommentResDto.builder()
+            .commentId(comment.getCommentId())
+            .content(comment.getContent())
+            .creator(comment.getCreator())
+            .createdAt(comment.getCreatedAt())
+            .build();
   }
 }

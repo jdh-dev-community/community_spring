@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.persistence.criteria.Fetch;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,7 +39,7 @@ public class Comment extends BaseEntity {
   private String password;
 
   @Schema(description = "부모 댓글 정보")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_id")
   private Comment parentComment;
 

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class CommentResDto {
   @Schema(description = "댓글의 id", example = "1")
