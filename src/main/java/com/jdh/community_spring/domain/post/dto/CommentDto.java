@@ -28,14 +28,18 @@ public class CommentDto {
   @Schema(description = "대댓글의 숫자", example = "0")
   private long childrenCommentCount;
 
+  @Schema(description = "게시글의 id", example = "1")
+  private long postId;
+
   // NOTE: 부모 댓글을 처리하기 위한 메소드
-  public static CommentDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount) {
+  public static CommentDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount, long postId) {
     return CommentDto.builder()
             .commentId(commentId)
             .content(content)
             .creator(creator)
             .createdAt(createdAt)
             .childrenCommentCount(childrenCommentCount)
+            .postId(postId)
             .build();
   }
 
@@ -46,6 +50,7 @@ public class CommentDto {
             .content(comment.getContent())
             .creator(comment.getCreator())
             .createdAt(comment.getUpdatedAt())
+            .postId(comment.getPost().getPostId())
             .build();
   }
 }
