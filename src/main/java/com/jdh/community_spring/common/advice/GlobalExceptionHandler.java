@@ -12,12 +12,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 
+import javax.persistence.EntityNotFoundException;
+
 import static org.springframework.http.HttpStatus.*;
 
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ResponseStatus(NOT_FOUND)
+  @ExceptionHandler(EntityNotFoundException.class)
+  public @ResponseBody HttpErrorInfo handleEntityNotFoundException(WebRequest req, NotFoundException ex) {
+    return createHttpErrorInfo(NOT_FOUND, req, ex);
+  }
+
   @ResponseStatus(BAD_REQUEST)
   @ExceptionHandler(BindException.class)
   public @ResponseBody HttpErrorInfo handleBindException(WebRequest req, BindException ex) {
