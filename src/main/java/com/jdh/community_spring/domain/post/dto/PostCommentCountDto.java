@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
+@Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PostCommentCountDto {
   @Schema(description = "게시글의 id", example = "1")
@@ -35,15 +36,25 @@ public class PostCommentCountDto {
   @Schema(description = "게시글의 생성일자", example = "2023-01-01T12:00:00")
   private LocalDateTime createdAt;
 
-  @Builder
-  public PostCommentCountDto(long postId, String title, String content, String category, String creator, long viewCount, long commentCount, LocalDateTime createdAt) {
-    this.postId = postId;
-    this.title = title;
-    this.content = content;
-    this.category = PostCategory.match(category);
-    this.creator = creator;
-    this.viewCount = viewCount;
-    this.commentCount = commentCount;
-    this.createdAt = createdAt;
+  public static PostCommentCountDto of(
+          long postId,
+          String title,
+          String content,
+          String category,
+          String creator,
+          long viewCount,
+          long commentCount,
+          LocalDateTime createdAt
+  ) {
+    return PostCommentCountDto.builder()
+            .postId(postId)
+            .title(title)
+            .content(content)
+            .category(PostCategory.match(category))
+            .creator(creator)
+            .viewCount(viewCount)
+            .commentCount(commentCount)
+            .createdAt(createdAt)
+            .build();
   }
 }
