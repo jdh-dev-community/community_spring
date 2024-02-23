@@ -6,7 +6,7 @@ import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
-import com.jdh.community_spring.domain.post.dto.CommentChildrenCountDto;
+import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
@@ -14,6 +14,7 @@ import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -34,13 +35,21 @@ public class CommentServiceImpl implements CommentService {
 
   private final SimpleEncrypt simpleEncrypt;
 
-  public List<CommentChildrenCountDto> getCommentList(long postId, ListReqDto dto) {
+
+  public List<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
     Pageable pageable = dto.toPageable();
-    List<CommentChildrenCountDto> comments = commentRepository.findCommentsByPostId(postId, pageable);
+    Page<Comment> comments = commentRepository.findAllByParentCommentId(commentId, pageable);
+    List<CommentDto> commentDtos = comments.stream().map(CommentDto::from).collect(Collectors.toList());
+
+    return commentDtos;
+  }
+
+  public List<CommentDto> getCommentList(long postId, ListReqDto dto) {
+    Pageable pageable = dto.toPageable();
+    List<CommentDto> comments = commentRepository.findCommentsByPostId(postId, pageable);
 
     return comments;
   }
-
 
 
   @Transactional
@@ -75,6 +84,7 @@ public class CommentServiceImpl implements CommentService {
             .parentComment(parent)
             .build();
   }
+
   private CommentResDto createCommentResDto(Comment comment) {
     List<CommentResDto> recomments = comment.getChildComments().stream().map(this::createReCommentResDto).collect(Collectors.toList());
 

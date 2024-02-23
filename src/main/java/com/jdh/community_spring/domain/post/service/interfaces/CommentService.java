@@ -10,6 +10,5 @@ import java.util.List;
 public interface CommentService {
   CommentResDto createComment(long postId, CommentCreateReqDto dto);
   List<CommentDto> getCommentList(long postId, ListReqDto dto);
-
-  void getChildCommentList(long commentId, ListReqDto dto);
+  List<CommentDto> getChildCommentList(long commentId, ListReqDto dto);
 }

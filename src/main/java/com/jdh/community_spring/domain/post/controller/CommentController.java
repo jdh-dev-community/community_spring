@@ -49,11 +49,12 @@ public class CommentController {
   @Operation(summary = "댓글 목록 조회", description = "최상위 댓글 목록을 조회합니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}/comment/{commentId}")
-  public void getChildComment(
-          @PathVariable("commentId") long commentId,
+  public List<CommentDto> getChildComment(
+          @PathVariable long commentId,
           @Valid @ModelAttribute ListReqDto dto
   ) {
-    commentService.getChildCommentList(commentId, dto);
+    List<CommentDto> comments = commentService.getChildCommentList(commentId, dto);
+    return comments;
   }
 
 }
