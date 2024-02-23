@@ -43,6 +43,29 @@ public class PostServiceImpl implements PostService {
   private final PostMapper postMapper;
 
   @Override
+  public ListResDto<PostCommentCountDto> getPostList(ListReqDto listReqDto) {
+    Pageable pageable = listReqDto.toPageable();
+    Page<PostCommentCountDto> post = postRepository.findAllPostWithCommentCount(pageable);
+
+    return new ListResDto<>(post.getTotalElements(), post.getContent());
+  }
+
+  @Transactional
+  @Override
+  public PostCommentsDto getPost(long postId) {
+    Post post = postRepository.findByIdInPessimisticWrite(postId)
+            .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+
+    post.setViewCount(post.getViewCount() + 1);
+    postRepository.save(post);
+
+    ListReqDto dto = ListReqDto.of(1, 3, SortBy.RECENT, OrderBy.DESC);
+    List<CommentDto> comments = commentService.getCommentList(postId, dto);
+
+    return PostCommentsDto.of(post, comments);
+  }
+
+  @Override
   public PostCommentCountDto createPost(PostCreateReqDto dto) {
     try {
       Post post = postMapper.from(dto);
@@ -55,12 +78,44 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public ListResDto<PostCommentCountDto> getPostList(ListReqDto listReqDto) {
-    Pageable pageable = listReqDto.toPageable();
-    Page<PostCommentCountDto> post = postRepository.findAllPostWithCommentCount(pageable);
+  public PostTokenResDto generateToken(PostTokenReqDto dto) {
 
-    return new ListResDto<>(post.getTotalElements(), post.getContent());
+    Post post = postRepository.findByIdWithException(dto.getPostId());
+    boolean isValidPassword = simpleEncrypt.match(dto.getPassword(), post.getPassword());
+
+    if (isValidPassword) {
+      String token = simpleEncrypt.encrypt(dto.getPostId() + dto.getPassword());
+      inMemoryDBProvider.setTemperarily(String.valueOf(dto.getPostId()), token, 3 * 60);
+      return new PostTokenResDto(token);
+    } else {
+      throw new IllegalArgumentException("잘못된 비밀번호입니다. 비밀번호를 확인해주세요");
+    }
   }
+
+  @Override
+  public void deletePost(String id) {
+    postRepository.deleteById(Long.parseLong(id));
+  }
+
+  @Override
+  public PostResDto editPost(String id, PostEditReqDto dto) {
+    long postId = Long.parseLong(id);
+    Optional<Post> optPost = postRepository.findById(postId);
+    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+
+    // TODO: mapper 사용하기
+    post.setTitle(dto.getTitle());
+    post.setTextContent(dto.getContent());
+    post.setCategory(dto.getCategory());
+    post.setCreator(dto.getCreator());
+
+    // TODO: save와 dirty check 쿼리 비교하기
+    postRepository.save(post);
+
+    PostResDto result = createPostResDto(post);
+    return result;
+  }
+
 
   private PostResDto createPostResDto(Post post) {
     List<Comment> commentList = post.getComments() != null ? post.getComments() : new ArrayList<>();
@@ -104,60 +159,6 @@ public class PostServiceImpl implements PostService {
             .build();
   }
 
-  @Transactional
-  @Override
-  public PostCommentsDto getPost(long postId) {
-    Post post = postRepository.findByIdInPessimisticWrite(postId)
-            .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
-
-    post.setViewCount(post.getViewCount() + 1);
-    postRepository.save(post);
-
-    ListReqDto dto = ListReqDto.of(1, 3, SortBy.RECENT, OrderBy.DESC);
-    List<CommentDto> comments = commentService.getCommentList(postId, dto);
-
-    return PostCommentsDto.of(post, comments);
-  }
-
-  @Override
-  public PostTokenResDto generateToken(PostTokenReqDto dto) {
-
-    Optional<Post> optPost = postRepository.findById(dto.getPostId());
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + dto.getPostId() + "] 게시글이 존재하지 않습니다"));
-    boolean isValidPassword = simpleEncrypt.match(dto.getPassword(), post.getPassword());
-
-    if (isValidPassword) {
-      String token = simpleEncrypt.encrypt(dto.getPostId() + dto.getPassword());
-      inMemoryDBProvider.setTemperarily(String.valueOf(dto.getPostId()), token, 3 * 60);
-      return new PostTokenResDto(token);
-    } else {
-      throw new IllegalArgumentException("잘못된 비밀번호입니다. 비밀번호를 확인해주세요");
-    }
-  }
-
-  @Override
-  public void deletePost(String id) {
-    postRepository.deleteById(Long.parseLong(id));
-  }
-
-  @Override
-  public PostResDto editPost(String id, PostEditReqDto dto) {
-    long postId = Long.parseLong(id);
-    Optional<Post> optPost = postRepository.findById(postId);
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
-
-    // TODO: mapper 사용하기
-    post.setTitle(dto.getTitle());
-    post.setTextContent(dto.getContent());
-    post.setCategory(dto.getCategory());
-    post.setCreator(dto.getCreator());
-
-    // TODO: save와 dirty check 쿼리 비교하기
-    postRepository.save(post);
-
-    PostResDto result = createPostResDto(post);
-    return result;
-  }
 }
 
 
