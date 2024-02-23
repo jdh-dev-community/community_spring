@@ -1,4 +1,4 @@
-package com.jdh.community_spring.domain.post.service;
+package com.jdh.community_spring.domain.post.service.impls;
 
 
 import com.jdh.community_spring.common.dto.ListReqDto;
@@ -11,7 +11,7 @@ import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
-import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
+import com.jdh.community_spring.domain.post.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

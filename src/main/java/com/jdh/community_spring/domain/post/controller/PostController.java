@@ -3,7 +3,7 @@ package com.jdh.community_spring.domain.post.controller;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
-import com.jdh.community_spring.domain.post.service.interfaces.PostService;
+import com.jdh.community_spring.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

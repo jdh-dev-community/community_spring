@@ -3,13 +3,12 @@ package com.jdh.community_spring.domain.post.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.dto.PostCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.PostResDto;
-import com.jdh.community_spring.domain.post.service.interfaces.PostService;
+import com.jdh.community_spring.domain.post.service.PostService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

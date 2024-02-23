@@ -4,7 +4,7 @@ import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentResDto;
-import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
+import com.jdh.community_spring.domain.post.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public class CommentController {
     return comments;
   }
 
-  @Operation(summary = "댓글 목록 조회", description = "최상위 댓글 목록을 조회합니다.")
+  @Operation(summary = "대댓글 목록 조회", description = "대댓글 목록을 조회합니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}/comment/{commentId}")
   public List<CommentDto> getChildComment(

@@ -1,4 +1,4 @@
-package com.jdh.community_spring.domain.post.service.interfaces;
+package com.jdh.community_spring.domain.post.service;
 
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
