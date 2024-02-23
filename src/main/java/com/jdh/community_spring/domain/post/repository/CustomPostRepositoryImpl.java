@@ -56,18 +56,16 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             .fetch();
 
     List<PostCommentCountDto> dtos = results.stream()
-            .map((result) -> {
-              return PostCommentCountDto.builder()
-                      .postId(result.get(post.postId))
-                      .title(result.get(post.title))
-                      .content(result.get(post.textContent))
-                      .category(result.get(post.category))
-                      .creator(result.get(post.creator))
-                      .viewCount(result.get(post.viewCount))
-                      .commentCount(result.get(comment.commentId.count()))
-                      .createdAt(result.get(post.createdAt))
-                      .build();
-            }).collect(Collectors.toList());
+            .map((result) -> PostCommentCountDto.of(
+                    result.get(post.postId),
+                    result.get(post.title),
+                    result.get(post.textContent),
+                    result.get(post.category),
+                    result.get(post.creator),
+                    result.get(post.viewCount),
+                    result.get(comment.commentId.count()),
+                    result.get(post.createdAt)
+            )).collect(Collectors.toList());
 
 
     return new PageImpl<>(dtos, pageable, count);

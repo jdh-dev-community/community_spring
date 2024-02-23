@@ -8,6 +8,7 @@ import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
+import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
+
+  private final CommentRepository commentRepository;
 
   private final InMemoryDBProvider inMemoryDBProvider;
 
@@ -111,35 +115,17 @@ public class PostServiceImpl implements PostService {
             .build();
   }
 
-
-
-
   @Transactional
   @Override
-  public PostResDto getPost(long postId) {
+  public PostCommentsDto getPost(long postId) {
     Optional<Post> optPost = postRepository.findByIdInPessimisticWrite(postId);
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+    Post post = optPost.orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
     post.setViewCount(post.getViewCount() + 1);
     postRepository.save(post);
 
-    PostResDto postResDto = PostResDto.builder()
-            .postId(post.getPostId())
-            .title(post.getTitle())
-            .content(post.getTextContent())
-            .category(post.getCategory())
-            .viewCount(post.getViewCount())
-            .creator(post.getCreator())
-            .createdAt(post.getCreatedAt())
-            .build();
+    List<CommentChildrenCommentCountDto> comments = commentRepository.findCommentsByPostId(postId);
 
-    List<Comment> list = post.getComments();
-    List<CommentResDto> comments = list.stream()
-            .map(this::createComment)
-            .collect(Collectors.toList());
-
-    postResDto.setComments(comments);
-
-    return postResDto;
+    return PostCommentsDto.of(post, comments);
   }
 
   @Override

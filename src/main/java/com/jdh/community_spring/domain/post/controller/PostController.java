@@ -39,11 +39,8 @@ public class PostController {
   @Operation(summary = "게시글 상세", description = "게시글 id를 기반으로 상세 내용을 불러오는 api 입니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}")
-  public PostResDto getPost(@PathVariable String id) {
-
-    long postId = Long.parseLong(id);
-    PostResDto post = postService.getPost(postId);
-
+  public PostCommentsDto getPost(@PathVariable("id") long postId) {
+    PostCommentsDto post = postService.getPost(postId);
     return post;
   }
 
