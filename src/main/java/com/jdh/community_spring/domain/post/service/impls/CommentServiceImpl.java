@@ -50,24 +50,30 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public CommentDto createComment(long postId, CommentCreateReqDto dto) {
-    Post post = postRepository.findById(postId)
-            .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+    try {
+      Post post = postRepository.findById(postId)
+              .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
 
-    Comment parentComment = dto.getParentId() != null
-            ? commentRepository.findById(dto.getParentId())
-            .orElseThrow(() -> new EntityNotFoundException("[commentId: " + dto.getParentId() + "] 댓글이 존재하지 않습니다"))
-            : null;
+      Comment parentComment = dto.getParentId() != null
+              ? commentRepository.findById(dto.getParentId())
+              .orElseThrow(() -> new EntityNotFoundException("[commentId: " + dto.getParentId() + "] 댓글이 존재하지 않습니다"))
+              : null;
 
-    Comment comment = Comment.builder()
-            .content(dto.getContent())
-            .creator(dto.getCreator())
-            .password(simpleEncrypt.encrypt(dto.getPassword()))
-            .parentComment(parentComment)
-            .post(post)
-            .build();
+      Comment comment = Comment.builder()
+              .content(dto.getContent())
+              .creator(dto.getCreator())
+              .password(simpleEncrypt.encrypt(dto.getPassword()))
+              .parentComment(parentComment)
+              .post(post)
+              .build();
 
-    commentRepository.save(comment);
+      commentRepository.save(comment);
 
-    return CommentDto.from(comment);
+      return CommentDto.from(comment);
+    } catch (Exception ex) {
+      log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
+      throw ex;
+    }
+
   }
 }
