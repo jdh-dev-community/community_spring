@@ -1,7 +1,7 @@
 package com.jdh.community_spring.domain.post.repository.impls;
 
 import com.jdh.community_spring.domain.post.domain.Comment;
-import com.jdh.community_spring.domain.post.dto.CommentChildrenCountDto;
+import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.repository.CustomBaseRepository;
 import com.jdh.community_spring.domain.post.repository.CustomCommentRepository;
 import com.querydsl.core.Tuple;
@@ -27,7 +27,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
   }
 
   @Override
-  public List<CommentChildrenCountDto> findCommentsByPostId(long postId, Pageable pageable) {
+  public List<CommentDto> findCommentsByPostId(long postId, Pageable pageable) {
     QComment commentAlias = new QComment("commentAlias");
 
     List<Tuple> comments = jpaQueryFactory
@@ -50,8 +50,8 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
             .offset(pageable.getOffset())
             .fetch();
 
-    List<CommentChildrenCountDto> dtos = comments.stream()
-            .map((result) -> CommentChildrenCountDto.of(
+    List<CommentDto> dtos = comments.stream()
+            .map((result) -> CommentDto.of(
                     result.get(comment.commentId),
                     result.get(comment.content),
                     result.get(comment.creator),

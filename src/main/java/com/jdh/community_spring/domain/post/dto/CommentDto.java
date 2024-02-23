@@ -1,5 +1,6 @@
 package com.jdh.community_spring.domain.post.dto;
 
+import com.jdh.community_spring.domain.post.domain.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class CommentChildrenCountDto {
+public class CommentDto {
   @Schema(description = "댓글의 id", example = "1")
   private long commentId;
 
@@ -27,8 +28,9 @@ public class CommentChildrenCountDto {
   @Schema(description = "대댓글의 숫자", example = "0")
   private long childrenCommentCount;
 
-  public static CommentChildrenCountDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount) {
-    return CommentChildrenCountDto.builder()
+  // NOTE: 부모 댓글을 처리하기 위한 메소드
+  public static CommentDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount) {
+    return CommentDto.builder()
             .commentId(commentId)
             .content(content)
             .creator(creator)
@@ -37,5 +39,13 @@ public class CommentChildrenCountDto {
             .build();
   }
 
-
+  // NOTE: 대댓글을 처리하기 위한 메소드
+  public static CommentDto from(Comment comment) {
+    return CommentDto.builder()
+            .commentId(comment.getCommentId())
+            .content(comment.getContent())
+            .creator(comment.getCreator())
+            .createdAt(comment.getUpdatedAt())
+            .build();
+  }
 }
