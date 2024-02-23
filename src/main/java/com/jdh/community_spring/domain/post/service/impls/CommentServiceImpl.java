@@ -2,13 +2,11 @@ package com.jdh.community_spring.domain.post.service.impls;
 
 
 import com.jdh.community_spring.common.dto.ListReqDto;
-import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
-import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.CommentService;
@@ -18,9 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -51,58 +48,26 @@ public class CommentServiceImpl implements CommentService {
     return comments;
   }
 
-
-  @Transactional
   @Override
-  public CommentResDto createComment(long postId, CommentCreateReqDto dto) {
-    Optional<Post> optPost = postRepository.findById(postId);
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+  public CommentDto createComment(long postId, CommentCreateReqDto dto) {
+    Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
 
-    Comment parentComment = null;
-    if (dto.getParentId() != null) {
-      Optional<Comment> optComment = commentRepository.findById(dto.getParentId());
-      parentComment = optComment.orElseThrow(() -> new NotFoundException("[commentId: " + dto.getParentId() + "] 댓글이 존재하지 않습니다"));
-    }
+    Comment parentComment = dto.getParentId() != null
+            ? commentRepository.findById(dto.getParentId())
+            .orElseThrow(() -> new EntityNotFoundException("[commentId: " + dto.getParentId() + "] 댓글이 존재하지 않습니다"))
+            : null;
 
-    try {
-      Comment comment = createComment(dto, parentComment);
-      Comment savedComment = commentRepository.save(comment);
-      return createCommentResDto(savedComment);
-    } catch (Exception ex) {
-      log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
-      throw ex;
-    }
-  }
-
-
-  private Comment createComment(CommentCreateReqDto dto, Comment parent) {
-    String hashedPassword = simpleEncrypt.encrypt(dto.getPassword());
-    return Comment.builder()
+    Comment comment = Comment.builder()
             .content(dto.getContent())
             .creator(dto.getCreator())
-            .password(hashedPassword)
-            .parentComment(parent)
+            .password(simpleEncrypt.encrypt(dto.getPassword()))
+            .parentComment(parentComment)
+            .post(post)
             .build();
-  }
 
-  private CommentResDto createCommentResDto(Comment comment) {
-    List<CommentResDto> recomments = comment.getChildComments().stream().map(this::createReCommentResDto).collect(Collectors.toList());
+    commentRepository.save(comment);
 
-    return CommentResDto.builder()
-            .commentId(comment.getCommentId())
-            .content(comment.getContent())
-            .creator(comment.getCreator())
-            .createdAt(comment.getCreatedAt())
-            .children(recomments)
-            .build();
-  }
-
-  private CommentResDto createReCommentResDto(Comment comment) {
-    return CommentResDto.builder()
-            .commentId(comment.getCommentId())
-            .content(comment.getContent())
-            .creator(comment.getCreator())
-            .createdAt(comment.getCreatedAt())
-            .build();
+    return CommentDto.from(comment);
   }
 }

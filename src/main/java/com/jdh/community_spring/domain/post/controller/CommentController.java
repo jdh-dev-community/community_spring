@@ -25,12 +25,11 @@ public class CommentController {
   @Operation(summary = "댓글 생성", description = "댓글, 작성자를 포함하는 댓글을 작성합니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post/{id}/comment")
-  public CommentResDto createComment(
-          @PathVariable String id,
-          @Valid @RequestBody CommentCreateReqDto dto) {
-
-    long postId = Long.parseLong(id);
-    CommentResDto result = commentService.createComment(postId, dto);
+  public CommentDto createComment(
+          @PathVariable long id,
+          @Valid @RequestBody CommentCreateReqDto dto
+  ) {
+    CommentDto result = commentService.createComment(id, dto);
 
     return result;
   }

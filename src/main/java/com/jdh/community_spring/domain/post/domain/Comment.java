@@ -45,8 +45,7 @@ public class Comment extends BaseEntity {
 
   @Schema(description = "자식 댓글")
   @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Comment> childComments = new ArrayList<>();
-
+  private List<Comment> childComments;
 
   @Schema(description = "댓글이 작성된 게시글 정보")
   @ManyToOne
