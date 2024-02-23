@@ -1,25 +1,19 @@
 package com.jdh.community_spring.domain.post.repository.impls;
 
 
-import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.dto.PostCommentCountDto;
 import com.jdh.community_spring.domain.post.repository.CustomBaseRepository;
 import com.jdh.community_spring.domain.post.repository.CustomPostRepository;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +29,20 @@ public class CustomPostRepositoryImpl implements CustomPostRepository, CustomBas
   public CustomPostRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
     this.jpaQueryFactory = jpaQueryFactory;
     this.entityPath = new PathBuilder<>(Post.class, "post");
+  }
+
+  @Override
+  public Post findByIdWithException(long postId) {
+    Post selectedPost = jpaQueryFactory
+            .selectFrom(post)
+            .where(post.postId.eq(postId))
+            .fetchOne();
+
+    if (selectedPost == null) {
+      new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다");
+    }
+
+    return selectedPost;
   }
 
 

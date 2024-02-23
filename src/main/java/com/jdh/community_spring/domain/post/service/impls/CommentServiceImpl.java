@@ -2,9 +2,9 @@ package com.jdh.community_spring.domain.post.service.impls;
 
 
 import com.jdh.community_spring.common.dto.ListReqDto;
-import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
+import com.jdh.community_spring.domain.post.domain.mapper.CommentMapper;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class CommentServiceImpl implements CommentService {
 
   private final PostRepository postRepository;
 
-  private final SimpleEncrypt simpleEncrypt;
+  private final CommentMapper commentMapper;
 
 
   public List<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
@@ -51,22 +50,13 @@ public class CommentServiceImpl implements CommentService {
   @Override
   public CommentDto createComment(long postId, CommentCreateReqDto dto) {
     try {
-      Post post = postRepository.findById(postId)
-              .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+      Post post = postRepository.findByIdWithException(dto.getParentId());
 
       Comment parentComment = dto.getParentId() != null
-              ? commentRepository.findById(dto.getParentId())
-              .orElseThrow(() -> new EntityNotFoundException("[commentId: " + dto.getParentId() + "] 댓글이 존재하지 않습니다"))
+              ? commentRepository.findByIdWithException(dto.getParentId())
               : null;
 
-      Comment comment = Comment.builder()
-              .content(dto.getContent())
-              .creator(dto.getCreator())
-              .password(simpleEncrypt.encrypt(dto.getPassword()))
-              .parentComment(parentComment)
-              .post(post)
-              .build();
-
+      Comment comment = commentMapper.of(dto, post, parentComment);
       commentRepository.save(comment);
 
       return CommentDto.from(comment);
@@ -74,6 +64,6 @@ public class CommentServiceImpl implements CommentService {
       log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
       throw ex;
     }
-
   }
+
 }

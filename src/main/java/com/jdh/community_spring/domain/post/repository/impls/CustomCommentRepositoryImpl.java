@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.jdh.community_spring.domain.post.domain.QComment;
+
+import javax.persistence.EntityNotFoundException;
+
 import static com.jdh.community_spring.domain.post.domain.QComment.comment;
 
 @Slf4j
@@ -24,6 +27,20 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
   public CustomCommentRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
     this.jpaQueryFactory = jpaQueryFactory;
     this.entityPath = new PathBuilder<>(Comment.class, "comment");
+  }
+
+  @Override
+  public Comment findByIdWithException(long commentId) {
+    Comment selectedComment = jpaQueryFactory
+            .selectFrom(comment)
+            .where(comment.commentId.eq(commentId))
+            .fetchOne();
+
+    if (selectedComment == null) {
+      new EntityNotFoundException("[commentId: " + commentId + "] 댓글이 존재하지 않습니다");
+    }
+
+    return selectedComment;
   }
 
   @Override
