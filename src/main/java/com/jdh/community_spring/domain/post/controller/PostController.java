@@ -31,8 +31,8 @@ public class PostController {
   @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post")
-  public ListResDto<PostResDto> getPostList(@Valid @ModelAttribute ListReqDto listReqDto) {
-    ListResDto<PostResDto> dto = postService.getPostList(listReqDto);
+  public ListResDto<PostCommentCountDto> getPostList(@Valid @ModelAttribute ListReqDto listReqDto) {
+    ListResDto<PostCommentCountDto> dto = postService.getPostList(listReqDto);
     return dto;
   }
 
@@ -69,6 +69,4 @@ public class PostController {
     PostResDto result = postService.editPost(id, dto);
     return result;
   }
-
-
 }

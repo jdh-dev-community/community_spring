@@ -1,5 +1,7 @@
 package com.jdh.community_spring.common.constant;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Arrays;
 
 public enum PostCategory {
@@ -13,6 +15,7 @@ public enum PostCategory {
     this.category = order.toLowerCase();
   }
 
+  @JsonValue
   public String getCategory() {
     return this.category;
   }

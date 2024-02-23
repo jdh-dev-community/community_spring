@@ -52,7 +52,8 @@ def querydslDir = "$projectDir/src/generated/querydsl"
 
 querydsl {
     jpa = true
-    querydslSourcesDir = querydslDir}
+    querydslSourcesDir = querydslDir
+}
 
 sourceSets {
     main.java.srcDir querydslDir

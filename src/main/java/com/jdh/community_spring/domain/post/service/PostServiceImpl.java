@@ -61,16 +61,11 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public ListResDto<PostResDto> getPostList(ListReqDto listReqDto) {
+  public ListResDto<PostCommentCountDto> getPostList(ListReqDto listReqDto) {
     Pageable pageable = listReqDto.toPageable();
+    Page<PostCommentCountDto> post = postRepository.findAllPostWithCommentCount(pageable);
 
-    Page<Post> page = postRepository.findAll(pageable);
-    List<PostResDto> dto = page.getContent()
-            .stream()
-            .map(this::createPostResDto)
-            .collect(Collectors.toList());
-
-    return new ListResDto<>(page.getTotalElements(), dto);
+    return new ListResDto<>(post.getTotalElements(), post.getContent());
   }
 
   private PostResDto createPostResDto(Post post) {

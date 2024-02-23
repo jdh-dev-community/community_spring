@@ -6,7 +6,7 @@ import com.jdh.community_spring.domain.post.dto.*;
 
 public interface PostService {
   PostResDto createPost(PostCreateReqDto dto);
-  ListResDto<PostResDto> getPostList(ListReqDto listReqDto);
+  ListResDto<PostCommentCountDto> getPostList(ListReqDto listReqDto);
   PostResDto getPost(long postId);
   PostTokenResDto generateToken(PostTokenReqDto dto);
   void deletePost(String id);
