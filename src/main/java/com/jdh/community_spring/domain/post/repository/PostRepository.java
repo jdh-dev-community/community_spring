@@ -1,6 +1,7 @@
 package com.jdh.community_spring.domain.post.repository;
 
 import com.jdh.community_spring.domain.post.domain.Post;
+import com.jdh.community_spring.domain.post.repository.CustomPostRepository;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

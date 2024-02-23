@@ -1,8 +1,11 @@
-package com.jdh.community_spring.domain.post.repository;
+package com.jdh.community_spring.domain.post.repository.impls;
 
 
+import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.dto.PostCommentCountDto;
+import com.jdh.community_spring.domain.post.repository.CustomBaseRepository;
+import com.jdh.community_spring.domain.post.repository.CustomPostRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -24,11 +27,16 @@ import static com.jdh.community_spring.domain.post.domain.QPost.post;
 import static com.jdh.community_spring.domain.post.domain.QComment.comment;
 
 @Slf4j
-@RequiredArgsConstructor
-@Repository
-public class CustomPostRepositoryImpl implements CustomPostRepository {
+public class CustomPostRepositoryImpl implements CustomPostRepository, CustomBaseRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
+  private final PathBuilder<Post> entityPath;
+
+  public CustomPostRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
+    this.jpaQueryFactory = jpaQueryFactory;
+    this.entityPath = new PathBuilder<>(Post.class, "post");
+  }
+
 
   @Override
   public Page<PostCommentCountDto> findAllPostWithCommentCount(Pageable pageable) {
@@ -50,7 +58,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             .from(post)
             .leftJoin(comment).on(comment.post.postId.eq(post.postId))
             .groupBy(post.postId)
-            .orderBy(extractOrder(pageable.getSort()))
+            .orderBy(extractOrder(pageable.getSort(), entityPath))
             .limit(pageable.getPageSize())
             .offset(pageable.getOffset())
             .fetch();
@@ -70,21 +78,4 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     return new PageImpl<>(dtos, pageable, count);
   }
-
-  private OrderSpecifier[] extractOrder(Sort sort) {
-    PathBuilder<Post> entityPath = new PathBuilder<>(Post.class, "post");
-    List<OrderSpecifier> orders = new ArrayList<>();
-
-    if (sort.isSorted()) {
-      for (Sort.Order order : sort) {
-        PathBuilder<Object> path = entityPath.get(order.getProperty());
-        Order selectedOrder = order.isAscending() ? Order.ASC : Order.DESC;
-
-        orders.add(new OrderSpecifier(selectedOrder, path));
-      }
-    }
-
-    return orders.toArray(new OrderSpecifier[0]);
-  }
-
 }

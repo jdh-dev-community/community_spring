@@ -1,10 +1,12 @@
 package com.jdh.community_spring.domain.post.service;
 
 
+import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
+import com.jdh.community_spring.domain.post.dto.CommentChildrenCountDto;
 import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
@@ -12,6 +14,7 @@ import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -30,6 +33,14 @@ public class CommentServiceImpl implements CommentService {
   private final PostRepository postRepository;
 
   private final SimpleEncrypt simpleEncrypt;
+
+  public List<CommentChildrenCountDto> getCommentList(long postId, ListReqDto dto) {
+    Pageable pageable = dto.toPageable();
+    List<CommentChildrenCountDto> comments = commentRepository.findCommentsByPostId(postId, pageable);
+
+    return comments;
+  }
+
 
 
   @Transactional

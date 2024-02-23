@@ -1,11 +1,14 @@
-package com.jdh.community_spring.domain.post.repository;
+package com.jdh.community_spring.domain.post.repository.impls;
 
-import com.jdh.community_spring.domain.post.dto.CommentChildrenCommentCountDto;
+import com.jdh.community_spring.domain.post.domain.Comment;
+import com.jdh.community_spring.domain.post.dto.CommentChildrenCountDto;
+import com.jdh.community_spring.domain.post.repository.CustomBaseRepository;
+import com.jdh.community_spring.domain.post.repository.CustomCommentRepository;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,16 +17,18 @@ import com.jdh.community_spring.domain.post.domain.QComment;
 import static com.jdh.community_spring.domain.post.domain.QComment.comment;
 
 @Slf4j
-@RequiredArgsConstructor
-@Repository
-public class CustomCommentRepositoryImpl implements CustomCommentRepository {
+public class CustomCommentRepositoryImpl implements CustomCommentRepository, CustomBaseRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
+  private final PathBuilder<Comment> entityPath;
+  public CustomCommentRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
+    this.jpaQueryFactory = jpaQueryFactory;
+    this.entityPath = new PathBuilder<>(Comment.class, "comment");
+  }
 
   @Override
-  public List<CommentChildrenCommentCountDto> findCommentsByPostId(long postId) {
+  public List<CommentChildrenCountDto> findCommentsByPostId(long postId, Pageable pageable) {
     QComment commentAlias = new QComment("commentAlias");
-    int INIT_COMMENT_COUNT = 5;
 
     List<Tuple> comments = jpaQueryFactory
             .select(
@@ -40,12 +45,13 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository {
                     comment.parentComment.isNull()
             )
             .groupBy(comment.commentId)
-            .orderBy(comment.createdAt.desc())
-            .limit(INIT_COMMENT_COUNT)
+            .orderBy(extractOrder(pageable.getSort(), entityPath))
+            .limit(pageable.getPageSize())
+            .offset(pageable.getOffset())
             .fetch();
 
-    List<CommentChildrenCommentCountDto> dtos = comments.stream()
-            .map((result) -> CommentChildrenCommentCountDto.of(
+    List<CommentChildrenCountDto> dtos = comments.stream()
+            .map((result) -> CommentChildrenCountDto.of(
                     result.get(comment.commentId),
                     result.get(comment.content),
                     result.get(comment.creator),
@@ -55,5 +61,4 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository {
 
     return dtos;
   }
-
 }
