@@ -9,6 +9,7 @@ import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
+import com.jdh.community_spring.domain.post.domain.mapper.PostMapper;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.CommentService;
@@ -39,30 +40,18 @@ public class PostServiceImpl implements PostService {
 
   private final SimpleEncrypt simpleEncrypt;
 
+  private final PostMapper postMapper;
+
   @Override
-  public PostResDto createPost(PostCreateReqDto dto) {
+  public PostCommentCountDto createPost(PostCreateReqDto dto) {
     try {
-      Post post = createPostEntity(dto);
+      Post post = postMapper.from(dto);
       Post savedPost = postRepository.save(post);
-      return createPostResDto(savedPost);
+      return PostCommentCountDto.from(savedPost);
     } catch (Exception ex) {
       log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
       throw ex;
     }
-  }
-
-
-  private Post createPostEntity(PostCreateReqDto dto) {
-
-    String hashedPassword = simpleEncrypt.encrypt(dto.getPassword());
-    return Post.builder()
-            .title(dto.getTitle())
-            .textContent(dto.getContent())
-            .creator(dto.getCreator())
-            .category(dto.getCategory().getCategory())
-            .viewCount(0)
-            .password(hashedPassword)
-            .build();
   }
 
   @Override

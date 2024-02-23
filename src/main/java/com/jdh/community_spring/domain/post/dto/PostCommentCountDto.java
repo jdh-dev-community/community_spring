@@ -1,6 +1,7 @@
 package com.jdh.community_spring.domain.post.dto;
 
 import com.jdh.community_spring.common.constant.PostCategory;
+import com.jdh.community_spring.domain.post.domain.Post;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -55,6 +56,18 @@ public class PostCommentCountDto {
             .viewCount(viewCount)
             .commentCount(commentCount)
             .createdAt(createdAt)
+            .build();
+  }
+
+  public static PostCommentCountDto from (Post post) {
+    return PostCommentCountDto.builder()
+            .postId(post.getPostId())
+            .title(post.getTitle())
+            .content(post.getTextContent())
+            .category(PostCategory.match(post.getCategory()))
+            .creator(post.getCreator())
+            .viewCount(post.getViewCount())
+            .createdAt(post.getCreatedAt())
             .build();
   }
 }

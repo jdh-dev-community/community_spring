@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
-@ToString
 @RequiredArgsConstructor
 public class CommentCreateReqDto {
   @Schema(description = "게시글의 내용", example = "When I start my server, the error below shows")

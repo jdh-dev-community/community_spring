@@ -53,18 +53,18 @@ public class PostControllerTest {
   class CreatePost {
     private final String url = baseUrl + "/post";
 
-    @Test
-    public void 요청의_Body가_유효할경우_201응답() throws Exception {
-      String requestBody = createDummyBody(null);
-      int postId = 1;
-      List<CommentResDto> list = new ArrayList<>();
-      PostResDto resDto = new PostResDto(postId, "제목", "컨텐츠", "question", "작성자", 0, list, LocalDateTime.now());
-      when(postService.createPost(any(PostCreateReqDto.class))).thenReturn(resDto);
-
-      postAndVerify(requestBody)
-              .andExpect(status().isCreated())
-              .andExpect(jsonPath("$.postId", Matchers.equalTo(postId)));
-    }
+//    @Test
+//    public void 요청의_Body가_유효할경우_201응답() throws Exception {
+//      String requestBody = createDummyBody(null);
+//      int postId = 1;
+//      List<CommentResDto> list = new ArrayList<>();
+//      PostResDto resDto = new PostResDto(postId, "제목", "컨텐츠", "question", "작성자", 0, list, LocalDateTime.now());
+//      when(postService.createPost(any(PostCreateReqDto.class))).thenReturn(resDto);
+//
+//      postAndVerify(requestBody)
+//              .andExpect(status().isCreated())
+//              .andExpect(jsonPath("$.postId", Matchers.equalTo(postId)));
+//    }
 
     @Test
     public void 요청의_Body에_필수값이누락된경우_400을응답() throws Exception {

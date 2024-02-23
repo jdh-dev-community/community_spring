@@ -23,8 +23,8 @@ public class PostController {
   @Operation(summary = "게시글 생성", description = "제목, 내용, 작성자, 카테고리를 포함하는 게시글을 작성합니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post")
-  public PostResDto createPost(@Valid @RequestBody PostCreateReqDto dto) {
-    PostResDto result = postService.createPost(dto);
+  public PostCommentCountDto createPost(@Valid @RequestBody PostCreateReqDto dto) {
+    PostCommentCountDto result = postService.createPost(dto);
     return result;
   }
 
