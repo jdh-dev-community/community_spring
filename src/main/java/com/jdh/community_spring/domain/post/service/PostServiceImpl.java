@@ -10,16 +10,13 @@ import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
-import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -128,7 +125,7 @@ public class PostServiceImpl implements PostService {
     postRepository.save(post);
 
     ListReqDto dto = ListReqDto.of(1, 3, SortBy.RECENT, OrderBy.DESC);
-    List<CommentChildrenCountDto> comments = commentService.getCommentList(postId, dto);
+    List<CommentDto> comments = commentService.getCommentList(postId, dto);
 
     return PostCommentsDto.of(post, comments);
   }
