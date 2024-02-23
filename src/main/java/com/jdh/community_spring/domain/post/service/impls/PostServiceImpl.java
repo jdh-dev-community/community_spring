@@ -1,4 +1,4 @@
-package com.jdh.community_spring.domain.post.service;
+package com.jdh.community_spring.domain.post.service.impls;
 
 import com.jdh.community_spring.common.constant.OrderBy;
 import com.jdh.community_spring.common.constant.SortBy;
@@ -11,8 +11,8 @@ import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
-import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
-import com.jdh.community_spring.domain.post.service.interfaces.PostService;
+import com.jdh.community_spring.domain.post.service.CommentService;
+import com.jdh.community_spring.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -56,7 +56,8 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     result.get(comment.content),
                     result.get(comment.creator),
                     result.get(comment.createdAt),
-                    result.get(commentAlias.commentId.count())
+                    result.get(commentAlias.commentId.count()),
+                    postId
             )).collect(Collectors.toList());
 
     return dtos;
