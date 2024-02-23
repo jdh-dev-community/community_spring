@@ -1,10 +1,11 @@
 package com.jdh.community_spring.domain.post.repository;
 
-import com.jdh.community_spring.domain.post.domain.Comment;
-import com.jdh.community_spring.domain.post.dto.CommentChildrenCommentCountDto;
+import com.jdh.community_spring.domain.post.dto.CommentChildrenCountDto;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 public interface CustomCommentRepository {
-  List<CommentChildrenCommentCountDto> findCommentsByPostId(long postId);
+  List<CommentChildrenCountDto> findCommentsByPostId(long postId, Pageable pageable);
 }

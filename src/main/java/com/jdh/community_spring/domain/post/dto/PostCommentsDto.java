@@ -10,7 +10,6 @@ import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -37,12 +36,12 @@ public class PostCommentsDto {
   private long viewCount;
 
   @Schema(description = "게시글에 달린 댓글 목록", example = "댓글[]")
-  List<CommentChildrenCommentCountDto> comments;
+  List<CommentChildrenCountDto> comments;
 
   @Schema(description = "게시글의 생성일자", example = "2023-01-01T12:00:00")
   private LocalDateTime createdAt;
 
-  public static PostCommentsDto of (Post post, List<CommentChildrenCommentCountDto> comments) {
+  public static PostCommentsDto of (Post post, List<CommentChildrenCountDto> comments) {
     return PostCommentsDto.builder()
             .postId(post.getPostId())
             .title(post.getTitle())

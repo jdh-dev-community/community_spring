@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class CommentChildrenCommentCountDto {
+public class CommentChildrenCountDto {
   @Schema(description = "댓글의 id", example = "1")
   private long commentId;
 
@@ -27,8 +27,8 @@ public class CommentChildrenCommentCountDto {
   @Schema(description = "대댓글의 숫자", example = "0")
   private long childrenCommentCount;
 
-  public static CommentChildrenCommentCountDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount) {
-    return CommentChildrenCommentCountDto.builder()
+  public static CommentChildrenCountDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount) {
+    return CommentChildrenCountDto.builder()
             .commentId(commentId)
             .content(content)
             .creator(creator)

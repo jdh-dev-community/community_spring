@@ -57,4 +57,8 @@ public class ListReqDto {
 
     return PageRequest.of(page, size, sort);
   }
+
+  public static ListReqDto of (int page, int size, SortBy sort, OrderBy order) {
+    return new ListReqDto(page, size, sort, order);
+  }
 }

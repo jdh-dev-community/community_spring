@@ -1,5 +1,7 @@
 package com.jdh.community_spring.domain.post.service;
 
+import com.jdh.community_spring.common.constant.OrderBy;
+import com.jdh.community_spring.common.constant.SortBy;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.provider.InMemoryDBProvider;
@@ -10,11 +12,14 @@ import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
+import com.jdh.community_spring.domain.post.service.interfaces.CommentService;
 import com.jdh.community_spring.domain.post.service.interfaces.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -31,9 +36,9 @@ public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
 
-  private final CommentRepository commentRepository;
-
   private final InMemoryDBProvider inMemoryDBProvider;
+
+  private final CommentService commentService;
 
   private final SimpleEncrypt simpleEncrypt;
 
@@ -48,7 +53,6 @@ public class PostServiceImpl implements PostService {
       throw ex;
     }
   }
-
 
 
   private Post createPostEntity(PostCreateReqDto dto) {
@@ -78,7 +82,6 @@ public class PostServiceImpl implements PostService {
     List<CommentResDto> comments = commentList
             .stream()
             .map(this::createComment).collect(Collectors.toList());
-
 
 
     return PostResDto.builder()
@@ -118,12 +121,14 @@ public class PostServiceImpl implements PostService {
   @Transactional
   @Override
   public PostCommentsDto getPost(long postId) {
-    Optional<Post> optPost = postRepository.findByIdInPessimisticWrite(postId);
-    Post post = optPost.orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+    Post post = postRepository.findByIdInPessimisticWrite(postId)
+            .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
+
     post.setViewCount(post.getViewCount() + 1);
     postRepository.save(post);
 
-    List<CommentChildrenCommentCountDto> comments = commentRepository.findCommentsByPostId(postId);
+    ListReqDto dto = ListReqDto.of(1, 3, SortBy.RECENT, OrderBy.DESC);
+    List<CommentChildrenCountDto> comments = commentService.getCommentList(postId, dto);
 
     return PostCommentsDto.of(post, comments);
   }
