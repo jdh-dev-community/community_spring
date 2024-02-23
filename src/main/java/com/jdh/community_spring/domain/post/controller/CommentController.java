@@ -3,7 +3,6 @@ package com.jdh.community_spring.domain.post.controller;
 import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
-import com.jdh.community_spring.domain.post.dto.CommentResDto;
 import com.jdh.community_spring.domain.post.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
