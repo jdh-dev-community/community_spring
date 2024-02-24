@@ -20,13 +20,7 @@ public class PostController {
 
   private final PostService postService;
 
-  @Operation(summary = "게시글 생성", description = "제목, 내용, 작성자, 카테고리를 포함하는 게시글을 작성합니다.")
-  @ResponseStatus(HttpStatus.CREATED)
-  @PostMapping("/post")
-  public PostCommentCountDto createPost(@Valid @RequestBody PostCreateReqDto dto) {
-    PostCommentCountDto result = postService.createPost(dto);
-    return result;
-  }
+
 
   @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")
   @ResponseStatus(HttpStatus.OK)
@@ -42,6 +36,14 @@ public class PostController {
   public PostCommentsDto getPost(@PathVariable("id") long postId) {
     PostCommentsDto post = postService.getPost(postId);
     return post;
+  }
+
+  @Operation(summary = "게시글 생성", description = "제목, 내용, 작성자, 카테고리를 포함하는 게시글을 작성합니다.")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PostMapping("/post")
+  public PostCommentCountDto createPost(@Valid @RequestBody PostCreateReqDto dto) {
+    PostCommentCountDto result = postService.createPost(dto);
+    return result;
   }
 
   @Operation(summary = "게시글 비밀번호 인증", description = "게시글 수정과 삭제를 위한 토큰 발급 api 입니다.")
@@ -62,8 +64,8 @@ public class PostController {
   @Operation(summary = "게시글 수정", description = "게시글 수정 api 입니다.")
   @ResponseStatus(HttpStatus.OK)
   @PutMapping("/post/{id}")
-  public PostResDto editPost(@PathVariable String id, @Valid @RequestBody PostEditReqDto dto) {
-    PostResDto result = postService.editPost(id, dto);
+  public PostCommentCountDto editPost(@PathVariable("id") long postId, @Valid @RequestBody PostEditReqDto dto) {
+    PostCommentCountDto result = postService.editPost(postId, dto);
     return result;
   }
 }
