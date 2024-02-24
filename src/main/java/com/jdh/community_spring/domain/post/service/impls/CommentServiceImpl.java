@@ -50,7 +50,7 @@ public class CommentServiceImpl implements CommentService {
   @Override
   public CommentDto createComment(long postId, CommentCreateReqDto dto) {
     try {
-      Post post = postRepository.findByIdWithException(dto.getParentId());
+      Post post = postRepository.findByIdWithException(postId);
 
       Comment parentComment = dto.getParentId() != null
               ? commentRepository.findByIdWithException(dto.getParentId())

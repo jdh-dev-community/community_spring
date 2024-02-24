@@ -26,7 +26,7 @@ public class CommentCreateReqDto {
   @Size(min = 4)
   private final String password;
 
-  @Schema(description = "대댓글인 경우 부모 댓글의 id", example = "1234")
+  @Schema(description = "대댓글인 경우 부모 댓글의 id", example = "1234", nullable = true)
   private final Long parentId;
 
   @Override
