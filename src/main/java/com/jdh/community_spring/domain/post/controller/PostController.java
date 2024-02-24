@@ -5,6 +5,9 @@ import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,7 +22,6 @@ import javax.validation.Valid;
 public class PostController {
 
   private final PostService postService;
-
 
 
   @Operation(summary = "게시글 목록", description = "게시글 목록을 페이지별로 불러올 수 있는 api 입니다.")
@@ -54,6 +56,23 @@ public class PostController {
     return result;
   }
 
+
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/post/{id}")
+  @Operation(
+          summary = "게시글 수정",
+          description = "게시글 수정 api 입니다.",
+          parameters = {
+                  @Parameter(name = "Authorization", required = true, in = ParameterIn.HEADER,
+                          description = "Bearer <token>", schema = @Schema(type = "string"))
+          }
+
+  )
+  public PostCommentCountDto editPost(@PathVariable("id") long postId, @Valid @RequestBody PostEditReqDto dto) {
+    PostCommentCountDto result = postService.editPost(postId, dto);
+    return result;
+  }
+
   @Operation(summary = "게시글 삭제", description = "게시글 삭제 api 입니다.")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/post/{id}")
@@ -61,11 +80,4 @@ public class PostController {
     postService.deletePost(id);
   }
 
-  @Operation(summary = "게시글 수정", description = "게시글 수정 api 입니다.")
-  @ResponseStatus(HttpStatus.OK)
-  @PutMapping("/post/{id}")
-  public PostCommentCountDto editPost(@PathVariable("id") long postId, @Valid @RequestBody PostEditReqDto dto) {
-    PostCommentCountDto result = postService.editPost(postId, dto);
-    return result;
-  }
 }
