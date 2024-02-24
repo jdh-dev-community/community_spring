@@ -37,9 +37,11 @@ dependencies {
     implementation 'com.mysql:mysql-connector-j:8.1.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'com.h2database:h2'
-
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+    implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20220608.1'
+
+
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
