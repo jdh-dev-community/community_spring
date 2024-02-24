@@ -64,16 +64,14 @@ public class Post extends BaseEntity {
     this.password = password;
   }
 
-  public void update(String title, String textContent, String creator, String category) {
-    List<String> inputs = List.of(title, textContent, creator, category);
+  public void update(String title, String textContent, String category) {
+    List<String> inputs = List.of(title, textContent, category);
     inputs.stream().filter(Objects::isNull).findFirst().ifPresent((n) -> {
       throw new IllegalArgumentException("잘못된 수정 요청입니다. 입력을 확인해주세요");
     });
 
-
     this.title = title;
     this.textContent = textContent;
-    this.creator = creator;
     this.category = category;
   }
 }

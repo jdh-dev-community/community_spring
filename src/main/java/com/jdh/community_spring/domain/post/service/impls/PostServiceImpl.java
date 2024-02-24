@@ -95,7 +95,6 @@ public class PostServiceImpl implements PostService {
     post.update(
             dto.getTitle(),
             dto.getContent(),
-            dto.getCreator(),
             dto.getCategory().getCategory()
     );
 

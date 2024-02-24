@@ -25,17 +25,12 @@ public class PostEditReqDto {
   @NotNull(message = "카테고리는 필수 입력 값입니다.")
   private final PostCategory category;
 
-  @Schema(description = "게시글의 작성자", example = "jack")
-  @NotNull(message = "작성자는 필수 입력 값입니다.")
-  private final String creator;
-
   @JsonCreator
   public static PostEditReqDto of (String title, String content, String category, String creator) {
     return PostEditReqDto.builder()
             .title(title)
             .content(content)
             .category(PostCategory.match(category))
-            .creator(creator)
             .build();
   }
 
@@ -45,7 +40,6 @@ public class PostEditReqDto {
             "title='" + title + '\'' +
             ", content='" + content + '\'' +
             ", category='" + category + '\'' +
-            ", creator='" + creator + '\'' +
             '}';
   }
 }
