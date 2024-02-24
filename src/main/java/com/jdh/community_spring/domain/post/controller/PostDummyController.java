@@ -1,5 +1,6 @@
 package com.jdh.community_spring.domain.post.controller;
 
+import com.jdh.community_spring.common.constant.PostCategory;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
@@ -30,8 +31,14 @@ public class PostDummyController {
 
     Integer size = body.get("size");
     List<Post> list = IntStream.rangeClosed(1, size)
-            .mapToObj((i) -> new Post("제목" + i, "이건 더미 데이터", "테스트", "테스트", simpleEncrypt.encrypt("1234")))
-            .collect(Collectors.toList());
+            .mapToObj((i) -> Post.builder()
+                    .title("제목" + i)
+                    .textContent("이건 더미 데이터")
+                    .creator("테스트")
+                    .category(PostCategory.AD)
+                    .password(simpleEncrypt.encrypt("1234"))
+                    .build()
+            ).collect(Collectors.toList());
 
     postRepository.saveAll(list);
   }

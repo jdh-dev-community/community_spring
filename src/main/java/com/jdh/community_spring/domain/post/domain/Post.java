@@ -1,20 +1,16 @@
 package com.jdh.community_spring.domain.post.domain;
 
+import com.jdh.community_spring.common.constant.PostCategory;
 import com.jdh.community_spring.common.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-
-@Builder
-@Data
-@EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "posts")
 public class Post extends BaseEntity {
@@ -56,22 +52,30 @@ public class Post extends BaseEntity {
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments;
 
-  public Post(String title, String textContent, String creator, String category, String password) {
+  @Builder
+  public Post(long postId, String title, String textContent, String creator, PostCategory category, long viewCount, String password, List<Comment> comments) {
+    this.postId = postId;
     this.title = title;
     this.textContent = textContent;
     this.creator = creator;
-    this.category = category;
+    this.category = category.getCategory();
+    this.viewCount = viewCount;
     this.password = password;
+    this.comments = comments;
   }
 
-  public void update(String title, String textContent, String category) {
-    List<String> inputs = List.of(title, textContent, category);
+  public void updatePost(String title, String textContent, PostCategory category) {
+    List<String> inputs = List.of(title, textContent, category.getCategory());
     inputs.stream().filter(Objects::isNull).findFirst().ifPresent((n) -> {
       throw new IllegalArgumentException("잘못된 수정 요청입니다. 입력을 확인해주세요");
     });
 
     this.title = title;
     this.textContent = textContent;
-    this.category = category;
+    this.category = category.getCategory();
+  }
+
+  public void updateViewCount() {
+    this.viewCount += 1;
   }
 }

@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "comments")
 public class Comment extends BaseEntity {
