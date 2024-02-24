@@ -5,15 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.persistence.criteria.Fetch;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
-@Builder
-@EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "comments")
@@ -52,4 +46,14 @@ public class Comment extends BaseEntity {
   @JoinColumn(name = "post_id")
   private Post post;
 
+  @Builder
+  public Comment(long commentId, String content, String creator, String password, Comment parentComment, List<Comment> childComments, Post post) {
+    this.commentId = commentId;
+    this.content = content;
+    this.creator = creator;
+    this.password = password;
+    this.parentComment = parentComment;
+    this.childComments = childComments;
+    this.post = post;
+  }
 }
