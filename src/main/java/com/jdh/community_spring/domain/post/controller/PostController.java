@@ -73,11 +73,18 @@ public class PostController {
     return result;
   }
 
-  @Operation(summary = "게시글 삭제", description = "게시글 삭제 api 입니다.")
+  @Operation(
+          summary = "게시글 삭제",
+          description = "게시글 삭제 api 입니다.",
+          parameters = {
+                  @Parameter(name = "Authorization", required = true, in = ParameterIn.HEADER,
+                          description = "Bearer <token>", schema = @Schema(type = "string"))
+          }
+  )
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/post/{id}")
-  public void deletePost(@PathVariable String id) {
-    postService.deletePost(id);
+  public void deletePost(@PathVariable("id") long postId) {
+    postService.deletePost(postId);
   }
 
 }
