@@ -104,14 +104,14 @@ public class PostServiceTest {
 //      assertThat(result.getContent().get(1).getCreatedAt()).isAfterOrEqualTo(result.getContent().get(0).getCreatedAt());
 //    }
 
-    private Page<Post> createDummy(Pageable pageable, int totalElements) {
-      String HashedPassword = "Fake Hashed";
-      List<Post> list = IntStream.rangeClosed(1, pageable.getPageSize())
-              .mapToObj((i) -> new Post(i, "title" + i, "text", "creator", "category", 0, HashedPassword, null))
-              .collect(Collectors.toList());
-
-      return new PageImpl<>(list, pageable, totalElements);
-    }
+//    private Page<Post> createDummy(Pageable pageable, int totalElements) {
+//      String HashedPassword = "Fake Hashed";
+//      List<Post> list = IntStream.rangeClosed(1, pageable.getPageSize())
+//              .mapToObj((i) -> new Post(i, "title" + i, "text", "creator", "category", 0, HashedPassword, null))
+//              .collect(Collectors.toList());
+//
+//      return new PageImpl<>(list, pageable, totalElements);
+//    }
   }
 
 

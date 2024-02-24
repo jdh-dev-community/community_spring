@@ -52,7 +52,7 @@ public class PostServiceImpl implements PostService {
     Post post = postRepository.findByIdInPessimisticWrite(postId)
             .orElseThrow(() -> new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
 
-    post.setViewCount(post.getViewCount() + 1);
+    post.updateViewCount();
     postRepository.save(post);
 
     ListReqDto dto = ListReqDto.of(1, 3, SortBy.RECENT, OrderBy.DESC);
@@ -88,15 +88,19 @@ public class PostServiceImpl implements PostService {
     }
   }
 
+
+
   @Override
   public PostCommentCountDto editPost(long postId, PostEditReqDto dto) {
     Post post = postRepository.findByIdWithException(postId);
 
-    post.update(
+    post.updatePost(
             dto.getTitle(),
             dto.getContent(),
-            dto.getCategory().getCategory()
+            dto.getCategory()
     );
+
+    postRepository.save(post);
 
     return PostCommentCountDto.from(post);
   }

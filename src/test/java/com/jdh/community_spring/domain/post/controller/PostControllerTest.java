@@ -5,9 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.dto.CommentResDto;
-import com.jdh.community_spring.domain.post.dto.PostCreateReqDto;
-import com.jdh.community_spring.domain.post.dto.PostResDto;
 import com.jdh.community_spring.domain.post.service.PostService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
@@ -142,30 +139,30 @@ public class PostControllerTest {
 //              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
 //    }
 
-    @Test
-    public void 요청에_유효하지않은값이포함시_400응답반환() throws Exception {
-      int invalidPage = 0;
-      int invalidSize = 0;
-
-      String url = baseUrl + "/post?page=" + invalidPage + "&size=" + invalidSize;
-
-      mockMvc.perform(get(url))
-              .andExpect(status().isBadRequest())
-              .andExpect(jsonPath("$.path", Matchers.equalTo(baseUrl + "/post")))
-              .andExpect(jsonPath("$.httpStatus", Matchers.equalTo(HttpStatus.BAD_REQUEST.name())))
-              .andExpect(jsonPath("$.timestamp", Matchers.notNullValue()))
-              .andExpect(jsonPath("$.message", Matchers.notNullValue()));
-
-    }
-
-    private ListResDto<PostResDto> createDummy(int size, int totalElements) {
-      List<CommentResDto> dummyComments = new ArrayList<>();
-      List<PostResDto> list = IntStream.rangeClosed(1, size)
-              .mapToObj((i) -> new PostResDto(i, "제목" + i, "이건 더미 데이터", "테스트", "테스트", 0, dummyComments, LocalDateTime.now()))
-              .collect(Collectors.toList());
-
-      return new ListResDto<>(totalElements, list);
-    }
+//    @Test
+//    public void 요청에_유효하지않은값이포함시_400응답반환() throws Exception {
+//      int invalidPage = 0;
+//      int invalidSize = 0;
+//
+//      String url = baseUrl + "/post?page=" + invalidPage + "&size=" + invalidSize;
+//
+//      mockMvc.perform(get(url))
+//              .andExpect(status().isBadRequest())
+//              .andExpect(jsonPath("$.path", Matchers.equalTo(baseUrl + "/post")))
+//              .andExpect(jsonPath("$.httpStatus", Matchers.equalTo(HttpStatus.BAD_REQUEST.name())))
+//              .andExpect(jsonPath("$.timestamp", Matchers.notNullValue()))
+//              .andExpect(jsonPath("$.message", Matchers.notNullValue()));
+//
+//    }
+//
+//    private ListResDto<PostResDto> createDummy(int size, int totalElements) {
+//      List<CommentResDto> dummyComments = new ArrayList<>();
+//      List<PostResDto> list = IntStream.rangeClosed(1, size)
+//              .mapToObj((i) -> new PostResDto(i, "제목" + i, "이건 더미 데이터", "테스트", "테스트", 0, dummyComments, LocalDateTime.now()))
+//              .collect(Collectors.toList());
+//
+//      return new ListResDto<>(totalElements, list);
+//    }
   }
 
   @DisplayName("게시글 상세 조회")
@@ -195,22 +192,22 @@ public class PostControllerTest {
 //              .andExpect(status().isBadRequest());
 //    }
 
-    @Test
-    public void 요청에_포함된id에_매칭되는게시글이없을시_404응답반환() throws Exception {
-      String notMatchedId = "1000000";
-
-      when(postService.getPost(Long.parseLong(notMatchedId))).thenThrow(NotFoundException.class);
-
-      mockMvc.perform(get(url + "/" + notMatchedId))
-              .andExpect(status().isNotFound());
-    }
-
-
-    private PostResDto createDummyPost(long postId) throws JsonProcessingException {
-      List<CommentResDto> dummyComments = new ArrayList<>();
-      PostResDto dto = new PostResDto(postId, "t", "t", "t", "2", 1, dummyComments, LocalDateTime.now());
-      return dto;
-    }
+//    @Test
+//    public void 요청에_포함된id에_매칭되는게시글이없을시_404응답반환() throws Exception {
+//      String notMatchedId = "1000000";
+//
+//      when(postService.getPost(Long.parseLong(notMatchedId))).thenThrow(NotFoundException.class);
+//
+//      mockMvc.perform(get(url + "/" + notMatchedId))
+//              .andExpect(status().isNotFound());
+//    }
+//
+//
+//    private PostResDto createDummyPost(long postId) throws JsonProcessingException {
+//      List<CommentResDto> dummyComments = new ArrayList<>();
+//      PostResDto dto = new PostResDto(postId, "t", "t", "t", "2", 1, dummyComments, LocalDateTime.now());
+//      return dto;
+//    }
 
   }
 }

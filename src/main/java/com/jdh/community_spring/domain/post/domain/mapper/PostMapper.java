@@ -16,7 +16,7 @@ public class PostMapper {
             .title(dto.getTitle())
             .textContent(dto.getContent())
             .creator(dto.getCreator())
-            .category(dto.getCategory().getCategory())
+            .category(dto.getCategory())
             .viewCount(0)
             .password(simpleEncrypt.encrypt(dto.getPassword()))
             .build();
