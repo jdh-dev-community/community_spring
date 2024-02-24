@@ -88,6 +88,8 @@ public class PostServiceImpl implements PostService {
     }
   }
 
+
+
   @Override
   public PostCommentCountDto editPost(long postId, PostEditReqDto dto) {
     Post post = postRepository.findByIdWithException(postId);
@@ -97,6 +99,8 @@ public class PostServiceImpl implements PostService {
             dto.getContent(),
             dto.getCategory().getCategory()
     );
+
+    postRepository.save(post);
 
     return PostCommentCountDto.from(post);
   }
