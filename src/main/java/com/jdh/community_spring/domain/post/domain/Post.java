@@ -5,7 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 
 @Builder
@@ -28,7 +30,7 @@ public class Post extends BaseEntity {
   private String title;
 
   @Schema(description = "게시글의 내용", example = "When I start my server, the error below shows")
-  @Column(name = "text_content", nullable = false, columnDefinition = "TEXT" )
+  @Column(name = "text_content", nullable = false, columnDefinition = "TEXT")
   private String textContent;
 
 
@@ -60,5 +62,16 @@ public class Post extends BaseEntity {
     this.creator = creator;
     this.category = category;
     this.password = password;
+  }
+
+  public void update(String title, String textContent, String category) {
+    List<String> inputs = List.of(title, textContent, category);
+    inputs.stream().filter(Objects::isNull).findFirst().ifPresent((n) -> {
+      throw new IllegalArgumentException("잘못된 수정 요청입니다. 입력을 확인해주세요");
+    });
+
+    this.title = title;
+    this.textContent = textContent;
+    this.category = category;
   }
 }

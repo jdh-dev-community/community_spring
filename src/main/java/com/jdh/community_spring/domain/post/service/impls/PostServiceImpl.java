@@ -3,10 +3,8 @@ package com.jdh.community_spring.domain.post.service.impls;
 import com.jdh.community_spring.common.constant.OrderBy;
 import com.jdh.community_spring.common.constant.SortBy;
 import com.jdh.community_spring.common.dto.ListReqDto;
-import com.jdh.community_spring.common.exception.NotFoundException;
 import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
-import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.domain.mapper.PostMapper;
@@ -22,10 +20,8 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,65 +39,11 @@ public class PostServiceImpl implements PostService {
   private final PostMapper postMapper;
 
   @Override
-  public PostCommentCountDto createPost(PostCreateReqDto dto) {
-    try {
-      Post post = postMapper.from(dto);
-      Post savedPost = postRepository.save(post);
-      return PostCommentCountDto.from(savedPost);
-    } catch (Exception ex) {
-      log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
-      throw ex;
-    }
-  }
-
-  @Override
   public ListResDto<PostCommentCountDto> getPostList(ListReqDto listReqDto) {
     Pageable pageable = listReqDto.toPageable();
     Page<PostCommentCountDto> post = postRepository.findAllPostWithCommentCount(pageable);
 
     return new ListResDto<>(post.getTotalElements(), post.getContent());
-  }
-
-  private PostResDto createPostResDto(Post post) {
-    List<Comment> commentList = post.getComments() != null ? post.getComments() : new ArrayList<>();
-
-    List<CommentResDto> comments = commentList
-            .stream()
-            .map(this::createComment).collect(Collectors.toList());
-
-
-    return PostResDto.builder()
-            .postId(post.getPostId())
-            .title(post.getTitle())
-            .content(post.getTextContent())
-            .category(post.getCategory())
-            .creator(post.getCreator())
-            .viewCount(post.getViewCount())
-            .comments(comments)
-            .createdAt(post.getCreatedAt())
-            .build();
-  }
-
-  private CommentResDto createComment(Comment comment) {
-    List<CommentResDto> children = comment.getChildComments()
-            .stream()
-            .map(this::createReComment).collect(Collectors.toList());
-
-    return CommentResDto.builder().commentId(comment.getCommentId())
-            .content(comment.getContent())
-            .creator(comment.getCreator())
-            .createdAt(comment.getCreatedAt())
-            .children(children)
-            .build();
-  }
-
-  private CommentResDto createReComment(Comment comment) {
-    return CommentResDto.builder()
-            .commentId(comment.getCommentId())
-            .content(comment.getContent())
-            .creator(comment.getCreator())
-            .createdAt(comment.getCreatedAt())
-            .build();
   }
 
   @Transactional
@@ -120,10 +62,21 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
+  public PostCommentCountDto createPost(PostCreateReqDto dto) {
+    try {
+      Post post = postMapper.from(dto);
+      Post savedPost = postRepository.save(post);
+      return PostCommentCountDto.from(savedPost);
+    } catch (Exception ex) {
+      log.error("입력값: {}, 메세지: {}", dto, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Override
   public PostTokenResDto generateToken(PostTokenReqDto dto) {
 
-    Optional<Post> optPost = postRepository.findById(dto.getPostId());
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + dto.getPostId() + "] 게시글이 존재하지 않습니다"));
+    Post post = postRepository.findByIdWithException(dto.getPostId());
     boolean isValidPassword = simpleEncrypt.match(dto.getPassword(), post.getPassword());
 
     if (isValidPassword) {
@@ -136,28 +89,24 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
+  public PostCommentCountDto editPost(long postId, PostEditReqDto dto) {
+    Post post = postRepository.findByIdWithException(postId);
+
+    post.update(
+            dto.getTitle(),
+            dto.getContent(),
+            dto.getCategory().getCategory()
+    );
+
+    return PostCommentCountDto.from(post);
+  }
+
+  @Override
   public void deletePost(String id) {
     postRepository.deleteById(Long.parseLong(id));
   }
 
-  @Override
-  public PostResDto editPost(String id, PostEditReqDto dto) {
-    long postId = Long.parseLong(id);
-    Optional<Post> optPost = postRepository.findById(postId);
-    Post post = optPost.orElseThrow(() -> new NotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다"));
 
-    // TODO: mapper 사용하기
-    post.setTitle(dto.getTitle());
-    post.setTextContent(dto.getContent());
-    post.setCategory(dto.getCategory());
-    post.setCreator(dto.getCreator());
-
-    // TODO: save와 dirty check 쿼리 비교하기
-    postRepository.save(post);
-
-    PostResDto result = createPostResDto(post);
-    return result;
-  }
 }
 
 

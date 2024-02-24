@@ -1,17 +1,17 @@
 package com.jdh.community_spring.domain.post.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.jdh.community_spring.common.constant.PostCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 
 @Getter
-@ToString
-@RequiredArgsConstructor
+@Builder(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PostEditReqDto {
   @Schema(description = "게시글의 제목", example = "Why this error occurs?")
   @NotBlank(message = "제목은 필수 입력 값입니다.")
@@ -21,12 +21,25 @@ public class PostEditReqDto {
   @NotBlank(message = "내용은 필수 입력 값입니다.")
   private final String content;
 
-  @Schema(description = "게시글의 카테고리", example = "질문, 홍보, 상담")
+  @Schema(description = "게시글의 카테고리 (질문, 홍보, 상담)", example = "질문")
   @NotNull(message = "카테고리는 필수 입력 값입니다.")
-  private final String category;
+  private final PostCategory category;
 
-  @Schema(description = "게시글의 작성자", example = "jack")
-  @NotNull(message = "작성자는 필수 입력 값입니다.")
-  private final String creator;
+  @JsonCreator
+  public static PostEditReqDto of (String title, String content, String category, String creator) {
+    return PostEditReqDto.builder()
+            .title(title)
+            .content(content)
+            .category(PostCategory.match(category))
+            .build();
+  }
 
+  @Override
+  public String toString() {
+    return "PostEditReqDto{" +
+            "title='" + title + '\'' +
+            ", content='" + content + '\'' +
+            ", category='" + category + '\'' +
+            '}';
+  }
 }

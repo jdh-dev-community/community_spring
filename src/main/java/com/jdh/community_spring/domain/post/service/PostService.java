@@ -10,5 +10,5 @@ public interface PostService {
   PostCommentsDto getPost(long postId);
   PostTokenResDto generateToken(PostTokenReqDto dto);
   void deletePost(String id);
-  PostResDto editPost(String id, PostEditReqDto dto);
+  PostCommentCountDto editPost(long id, PostEditReqDto dto);
 }

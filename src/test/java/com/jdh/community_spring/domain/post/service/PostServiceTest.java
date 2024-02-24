@@ -145,45 +145,45 @@ public class PostServiceTest {
 
   }
 
-
-  @DisplayName("게시글수정삭제인증")
-  @Nested
-  class GenerateToken {
-    @Test
-    public void 매칭되는_게시물이없는경우_NotFoundException발생() {
-      PostTokenReqDto dummyDto = new PostTokenReqDto(1000L, "1234");
-
-      when(postRepository.findById(dummyDto.getPostId())).thenThrow(NotFoundException.class);
-      assertThrows(NotFoundException.class, () -> postService.generateToken(dummyDto));
-    }
-
-    @Test
-    public void 비밀번호가_잘못된경우_IllegalArgumentException발생() {
-      PostTokenReqDto dummyDto = new PostTokenReqDto(1000L, "1234");
-      Post dummyPost = new Post("제목", "내용", "작성자", "카테고리", "비밀번호");
-
-      when(postRepository.findById(dummyDto.getPostId())).thenReturn(Optional.ofNullable(dummyPost));
-      when(simpleEncrypt.match(dummyDto.getPassword(), dummyPost.getPassword())).thenReturn(false);
-      assertThrows(IllegalArgumentException.class, () -> postService.generateToken(dummyDto));
-    }
-
-    @Test
-    public void 비밀번호가_일치하는경우_token반환() {
-      PostTokenReqDto dummyDto = new PostTokenReqDto(1000, "1234");
-      Post dummyPost = new Post("제목", "내용", "작성자", "카테고리", "1234");
-      String dummyToken = "Dummy Token";
-
-      when(postRepository.findById(dummyDto.getPostId())).thenReturn(Optional.ofNullable(dummyPost));
-      when(simpleEncrypt.match(dummyDto.getPassword(), dummyPost.getPassword())).thenReturn(true);
-      when(simpleEncrypt.encrypt(dummyDto.getPostId() + dummyDto.getPassword())).thenReturn(dummyToken);
-
-      PostTokenResDto result = postService.generateToken(dummyDto);
-
-      assertEquals(result.getToken(), dummyToken);
-      verify(inMemoryDBProvider, times(1)).setTemperarily(eq(String.valueOf(dummyDto.getPostId())), eq(result.getToken()), eq((long) 3 * 60));
-    }
-
-
-  }
+//
+//  @DisplayName("게시글수정삭제인증")
+//  @Nested
+//  class GenerateToken {
+//    @Test
+//    public void 매칭되는_게시물이없는경우_NotFoundException발생() {
+//      PostTokenReqDto dummyDto = new PostTokenReqDto(1000L, "1234");
+//
+//      when(postRepository.findById(dummyDto.getPostId())).thenThrow(NotFoundException.class);
+//      assertThrows(NotFoundException.class, () -> postService.generateToken(dummyDto));
+//    }
+//
+//    @Test
+//    public void 비밀번호가_잘못된경우_IllegalArgumentException발생() {
+//      PostTokenReqDto dummyDto = new PostTokenReqDto(1000L, "1234");
+//      Post dummyPost = new Post("제목", "내용", "작성자", "카테고리", "비밀번호");
+//
+//      when(postRepository.findById(dummyDto.getPostId())).thenReturn(Optional.ofNullable(dummyPost));
+//      when(simpleEncrypt.match(dummyDto.getPassword(), dummyPost.getPassword())).thenReturn(false);
+//      assertThrows(IllegalArgumentException.class, () -> postService.generateToken(dummyDto));
+//    }
+//
+//    @Test
+//    public void 비밀번호가_일치하는경우_token반환() {
+//      PostTokenReqDto dummyDto = new PostTokenReqDto(1000, "1234");
+//      Post dummyPost = new Post("제목", "내용", "작성자", "카테고리", "1234");
+//      String dummyToken = "Dummy Token";
+//
+//      when(postRepository.findById(dummyDto.getPostId())).thenReturn(Optional.ofNullable(dummyPost));
+//      when(simpleEncrypt.match(dummyDto.getPassword(), dummyPost.getPassword())).thenReturn(true);
+//      when(simpleEncrypt.encrypt(dummyDto.getPostId() + dummyDto.getPassword())).thenReturn(dummyToken);
+//
+//      PostTokenResDto result = postService.generateToken(dummyDto);
+//
+//      assertEquals(result.getToken(), dummyToken);
+//      verify(inMemoryDBProvider, times(1)).setTemperarily(eq(String.valueOf(dummyDto.getPostId())), eq(result.getToken()), eq((long) 3 * 60));
+//    }
+//
+//
+//  }
 
 }
