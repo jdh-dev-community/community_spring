@@ -30,7 +30,7 @@ public class PostEditReqDto {
   private final String creator;
 
   @JsonCreator
-  public static PostEditReqDto of (String title, String content, String category, String creator, String password) {
+  public static PostEditReqDto of (String title, String content, String category, String creator) {
     return PostEditReqDto.builder()
             .title(title)
             .content(content)
