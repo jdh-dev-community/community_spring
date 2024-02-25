@@ -36,8 +36,6 @@ public class TokenFilter implements Filter {
         log.info("[Filter] Pass auth filter: {}" , httpRequest.getRequestURI());
         chain.doFilter(request, response);
     }
-
-
   }
 
   private boolean isValidToken(HttpServletRequest request, HttpServletResponse httpResponse) {

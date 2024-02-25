@@ -19,7 +19,6 @@ public class InMemoryDBProvider {
     stringRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(second));
   }
   public void set(String key, String value) {
-
     stringRedisTemplate.opsForValue().set(key, value);
   }
 
