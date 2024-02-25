@@ -1,5 +1,6 @@
 package com.jdh.community_spring.domain.post.dto;
 
+import com.jdh.community_spring.common.constant.CommentStatusKey;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -31,8 +32,11 @@ public class CommentDto {
   @Schema(description = "게시글의 id", example = "1")
   private long postId;
 
+  @Schema(description = "댓글의 상태 ", example = "active")
+  private CommentStatusKey status;
+
   // NOTE: 부모 댓글을 처리하기 위한 메소드
-  public static CommentDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount, long postId) {
+  public static CommentDto of(long commentId, String content, String creator, LocalDateTime createdAt, long childrenCommentCount, long postId, CommentStatusKey status) {
     return CommentDto.builder()
             .commentId(commentId)
             .content(content)
@@ -40,6 +44,7 @@ public class CommentDto {
             .createdAt(createdAt)
             .childrenCommentCount(childrenCommentCount)
             .postId(postId)
+            .status(status)
             .build();
   }
 
@@ -51,6 +56,20 @@ public class CommentDto {
             .creator(comment.getCreator())
             .createdAt(comment.getUpdatedAt())
             .postId(comment.getPost().getPostId())
+            .status(CommentStatusKey.match(comment.getCommentStatus().getCommentStatus()))
             .build();
+  }
+
+  @Override
+  public String toString() {
+    return "CommentDto{" +
+            "commentId=" + commentId +
+            ", content='" + content + '\'' +
+            ", creator='" + creator + '\'' +
+            ", createdAt=" + createdAt +
+            ", childrenCommentCount=" + childrenCommentCount +
+            ", postId=" + postId +
+            ", status=" + status +
+            '}';
   }
 }

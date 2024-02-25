@@ -1,5 +1,6 @@
 package com.jdh.community_spring.domain.post.repository.impls;
 
+import com.jdh.community_spring.common.constant.CommentStatusKey;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.repository.CustomBaseRepository;
@@ -53,8 +54,10 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     comment.content,
                     comment.creator,
                     comment.createdAt,
-                    commentAlias.commentId.count()
+                    commentAlias.commentId.count(),
+                    comment.commentStatus.commentStatus
             ).from(comment)
+            .leftJoin(comment.commentStatus)
             .leftJoin(commentAlias)
             .on(commentAlias.parentComment.commentId.eq(comment.commentId))
             .where(
@@ -67,6 +70,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
             .offset(pageable.getOffset())
             .fetch();
 
+
     List<CommentDto> dtos = comments.stream()
             .map((result) -> CommentDto.of(
                     result.get(comment.commentId),
@@ -74,7 +78,8 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     result.get(comment.creator),
                     result.get(comment.createdAt),
                     result.get(commentAlias.commentId.count()),
-                    postId
+                    postId,
+                    CommentStatusKey.match(result.get(comment.commentStatus.commentStatus))
             )).collect(Collectors.toList());
 
     return dtos;
