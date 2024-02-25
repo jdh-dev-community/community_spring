@@ -56,7 +56,7 @@ public class Post extends BaseEntity {
   private Long version;
 
   @Builder
-  public Post(long postId, String title, String textContent, String creator, PostCategory category, long viewCount, String password, List<Comment> comments) {
+  public Post(long postId, String title, String textContent, String creator, PostCategory category, long viewCount, String password, List<Comment> comments, Long version) {
     this.postId = postId;
     this.title = title;
     this.textContent = textContent;
@@ -65,6 +65,7 @@ public class Post extends BaseEntity {
     this.viewCount = viewCount;
     this.password = password;
     this.comments = comments;
+    this.version = version;
   }
 
   public void updatePost(String title, String textContent, PostCategory category) {
