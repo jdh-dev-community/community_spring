@@ -8,7 +8,7 @@ public interface PostService {
   PostCommentCountDto createPost(PostCreateReqDto dto);
   ListResDto<PostCommentCountDto> getPostList(ListReqDto listReqDto);
   PostCommentsDto getPost(long postId);
-  PostTokenResDto generateToken(PostTokenReqDto dto);
+  TokenResDto generateToken(PostTokenReqDto dto);
   PostCommentCountDto editPost(long postId, PostEditReqDto dto);
   void deletePost(long postId);
 }

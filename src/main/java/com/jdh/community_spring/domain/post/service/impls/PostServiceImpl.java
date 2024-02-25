@@ -74,7 +74,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostTokenResDto generateToken(PostTokenReqDto dto) {
+  public TokenResDto generateToken(PostTokenReqDto dto) {
 
     Post post = postRepository.findByIdWithException(dto.getPostId());
     boolean isValidPassword = simpleEncrypt.match(dto.getPassword(), post.getPassword());
@@ -82,7 +82,7 @@ public class PostServiceImpl implements PostService {
     if (isValidPassword) {
       String token = simpleEncrypt.encrypt(dto.getPostId() + dto.getPassword());
       inMemoryDBProvider.setTemperarily(String.valueOf(dto.getPostId()), token, 3 * 60);
-      return new PostTokenResDto(token);
+      return new TokenResDto(token);
     } else {
       throw new IllegalArgumentException("잘못된 비밀번호입니다. 비밀번호를 확인해주세요");
     }

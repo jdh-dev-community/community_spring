@@ -51,11 +51,10 @@ public class PostController {
   @Operation(summary = "게시글 비밀번호 인증", description = "게시글 수정과 삭제를 위한 토큰 발급 api 입니다.")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/post/token")
-  public PostTokenResDto getAuthToken(@Valid @RequestBody PostTokenReqDto dto) {
-    PostTokenResDto result = postService.generateToken(dto);
+  public TokenResDto getAuthToken(@Valid @RequestBody PostTokenReqDto dto) {
+    TokenResDto result = postService.generateToken(dto);
     return result;
   }
-
 
   @ResponseStatus(HttpStatus.OK)
   @PutMapping("/post/{id}")

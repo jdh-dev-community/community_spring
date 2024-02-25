@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class PostTokenResDto {
+public class TokenResDto {
 
   @Schema(description = "3분간 유효한 토큰", example = "hash string")
   private final String token;

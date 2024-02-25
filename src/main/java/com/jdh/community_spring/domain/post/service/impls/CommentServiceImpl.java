@@ -2,11 +2,12 @@ package com.jdh.community_spring.domain.post.service.impls;
 
 
 import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.provider.InMemoryDBProvider;
+import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.domain.mapper.CommentMapper;
-import com.jdh.community_spring.domain.post.dto.CommentDto;
-import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
+import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.CommentService;
@@ -30,6 +31,10 @@ public class CommentServiceImpl implements CommentService {
   private final PostRepository postRepository;
 
   private final CommentMapper commentMapper;
+
+  private final SimpleEncrypt simpleEncrypt;
+
+  private final InMemoryDBProvider inMemoryDBProvider;
 
 
   public List<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
@@ -65,5 +70,25 @@ public class CommentServiceImpl implements CommentService {
       throw ex;
     }
   }
+
+  @Override
+  public TokenResDto generateToken(long commentId, TokenReqDto dto) {
+    Comment comment = commentRepository.findByIdWithException(commentId);
+    boolean isValidPassword = simpleEncrypt.match(dto.getPassword(), comment.getPassword());
+
+    if (isValidPassword) {
+      String token = simpleEncrypt.encrypt(commentId + dto.getPassword());
+      inMemoryDBProvider.setTemperarily(String.valueOf(commentId), token, 3 * 60);
+      return new TokenResDto(token);
+    } else {
+      throw new IllegalArgumentException("잘못된 비밀번호입니다. 비밀번호를 확인해주세요");
+    }
+  }
+
+  @Override
+  public void deleteComment(long commentId) {
+    commentRepository.deleteById(commentId);
+  }
+
 
 }

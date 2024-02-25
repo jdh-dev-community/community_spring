@@ -1,10 +1,12 @@
 package com.jdh.community_spring.domain.post.controller;
 
 import com.jdh.community_spring.common.dto.ListReqDto;
-import com.jdh.community_spring.domain.post.dto.CommentDto;
-import com.jdh.community_spring.domain.post.dto.CommentCreateReqDto;
+import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -54,5 +56,32 @@ public class CommentController {
     List<CommentDto> comments = commentService.getChildCommentList(commentId, dto);
     return comments;
   }
+
+  @Operation(summary = "댓글 비밀번호 인증", description = "댓글/대댓글 수정과 삭제를 위한 토큰 발급 api 입니다.")
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/post/{id}/comment/{commentId}/token")
+  public TokenResDto getCommentAuthToken(
+          @PathVariable long commentId,
+          @Valid @RequestBody TokenReqDto dto
+  ) {
+    log.info("hi: >> " + commentId);
+    TokenResDto token = commentService.generateToken(commentId, dto);
+    return token;
+  }
+
+  @Operation(
+          summary = "댓글 삭제",
+          description = "댓글 삭제 api 입니다.",
+          parameters = {
+                  @Parameter(name = "Authorization", required = true, in = ParameterIn.HEADER,
+                          description = "Bearer <token>", schema = @Schema(type = "string"))
+          }
+  )
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping("/post/{id}/comment/{commentId}")
+  public void deletePost(@PathVariable long commentId) {
+    commentService.deleteComment(commentId);
+  }
+
 
 }
