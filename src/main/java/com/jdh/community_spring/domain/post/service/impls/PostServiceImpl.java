@@ -90,6 +90,7 @@ public class PostServiceImpl implements PostService {
 
 
 
+  @Transactional
   @Override
   public PostCommentCountDto editPost(long postId, PostEditReqDto dto) {
     Post post = postRepository.findByIdWithException(postId);
