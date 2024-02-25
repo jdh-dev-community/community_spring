@@ -1,10 +1,10 @@
 package com.jdh.community_spring.domain.post.dto;
 
 
+import com.jdh.community_spring.common.constant.CommentStatusKey;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -29,12 +29,16 @@ public class CommentCreateReqDto {
   @Schema(description = "대댓글인 경우 부모 댓글의 id", example = "1234", nullable = true)
   private final Long parentId;
 
+  @Schema(description = "댓글의 상태 (active/inactive/blocked)", example = "1234", nullable = true)
+  private final CommentStatusKey status = CommentStatusKey.ACTIVE;
+
   @Override
   public String toString() {
     return "CommentCreateReqDto{" +
             "content='" + content + '\'' +
             ", creator='" + creator + '\'' +
             ", password='" + password + '\'' +
+            ", status='" + status + '\'' +
             ", parentId=" + parentId +
             '}';
   }

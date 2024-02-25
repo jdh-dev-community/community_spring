@@ -1,10 +1,12 @@
 package com.jdh.community_spring.domain.post.repository.impls;
 
+import com.jdh.community_spring.common.constant.CommentStatusKey;
 import com.jdh.community_spring.domain.post.domain.Comment;
 import com.jdh.community_spring.domain.post.dto.CommentDto;
 import com.jdh.community_spring.domain.post.repository.CustomBaseRepository;
 import com.jdh.community_spring.domain.post.repository.CustomCommentRepository;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
 
   private final JPAQueryFactory jpaQueryFactory;
   private final PathBuilder<Comment> entityPath;
+
   public CustomCommentRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
     this.jpaQueryFactory = jpaQueryFactory;
     this.entityPath = new PathBuilder<>(Comment.class, "comment");
@@ -47,14 +50,20 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
   public List<CommentDto> findCommentsByPostId(long postId, Pageable pageable) {
     QComment commentAlias = new QComment("commentAlias");
 
+    BooleanExpression isActive = comment.commentStatus.commentStatus.eq("active");
+    BooleanExpression hasReplies = commentAlias.commentId.count().gt(0);
+    BooleanExpression isInactiveWithReplies = comment.commentStatus.commentStatus.ne("active").and(hasReplies);
+
     List<Tuple> comments = jpaQueryFactory
             .select(
                     comment.commentId,
                     comment.content,
                     comment.creator,
                     comment.createdAt,
-                    commentAlias.commentId.count()
+                    commentAlias.commentId.count(),
+                    comment.commentStatus.commentStatus
             ).from(comment)
+            .leftJoin(comment.commentStatus)
             .leftJoin(commentAlias)
             .on(commentAlias.parentComment.commentId.eq(comment.commentId))
             .where(
@@ -62,10 +71,12 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     comment.parentComment.isNull()
             )
             .groupBy(comment.commentId)
+            .having(isActive.or(isInactiveWithReplies))
             .orderBy(extractOrder(pageable.getSort(), entityPath))
             .limit(pageable.getPageSize())
             .offset(pageable.getOffset())
             .fetch();
+
 
     List<CommentDto> dtos = comments.stream()
             .map((result) -> CommentDto.of(
@@ -74,7 +85,8 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     result.get(comment.creator),
                     result.get(comment.createdAt),
                     result.get(commentAlias.commentId.count()),
-                    postId
+                    postId,
+                    CommentStatusKey.match(result.get(comment.commentStatus.commentStatus))
             )).collect(Collectors.toList());
 
     return dtos;

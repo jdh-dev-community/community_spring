@@ -11,8 +11,8 @@ public enum PostCategory {
 
   private final String category;
 
-  PostCategory(String order) {
-    this.category = order.toLowerCase();
+  PostCategory(String category) {
+    this.category = category.toLowerCase();
   }
 
   @JsonValue

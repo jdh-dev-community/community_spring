@@ -64,7 +64,6 @@ public class CommentController {
           @PathVariable long commentId,
           @Valid @RequestBody TokenReqDto dto
   ) {
-    log.info("hi: >> " + commentId);
     TokenResDto token = commentService.generateToken(commentId, dto);
     return token;
   }
@@ -77,10 +76,11 @@ public class CommentController {
                           description = "Bearer <token>", schema = @Schema(type = "string"))
           }
   )
-  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/post/{id}/comment/{commentId}")
-  public void deletePost(@PathVariable long commentId) {
-    commentService.deleteComment(commentId);
+  public CommentDto deletePost(@PathVariable long commentId) {
+    CommentDto result = commentService.deleteComment(commentId);
+    return result;
   }
 
 

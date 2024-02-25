@@ -5,10 +5,12 @@ import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
+import com.jdh.community_spring.domain.post.domain.CommentStatus;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.domain.mapper.CommentMapper;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
+import com.jdh.community_spring.domain.post.repository.CommentStatusRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import com.jdh.community_spring.domain.post.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,8 @@ public class CommentServiceImpl implements CommentService {
   private final CommentRepository commentRepository;
 
   private final PostRepository postRepository;
+
+  private final CommentStatusRepository commentStatusRepository;
 
   private final CommentMapper commentMapper;
 
@@ -61,7 +67,10 @@ public class CommentServiceImpl implements CommentService {
               ? commentRepository.findByIdWithException(dto.getParentId())
               : null;
 
-      Comment comment = commentMapper.of(dto, post, parentComment);
+      CommentStatus status = commentStatusRepository.findByCommentStatus(dto.getStatus().getCommentStatus())
+              .orElseThrow(() -> new EntityNotFoundException("[status: ] " + dto.getStatus().getCommentStatus() + " comment status를 찾지 못했습니다."));
+
+      Comment comment = commentMapper.of(dto, post, parentComment, status);
       commentRepository.save(comment);
 
       return CommentDto.from(comment);
@@ -85,9 +94,17 @@ public class CommentServiceImpl implements CommentService {
     }
   }
 
+  @Transactional
   @Override
-  public void deleteComment(long commentId) {
-    commentRepository.deleteById(commentId);
+  public CommentDto deleteComment(long commentId) {
+    Comment comment = commentRepository.findByIdWithException(commentId);
+    CommentStatus commentStatus = commentStatusRepository.findByCommentStatus("inactive")
+            .orElseThrow(() -> new EntityNotFoundException("[status: inactive] comment status를 찾지 못했습니다."));
+
+    comment.updateComment(commentStatus);
+    commentRepository.save(comment);
+
+    return CommentDto.from(comment);
   }
 
 
