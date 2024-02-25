@@ -52,6 +52,9 @@ public class Post extends BaseEntity {
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Comment> comments;
 
+  @Version
+  private Long version;
+
   @Builder
   public Post(long postId, String title, String textContent, String creator, PostCategory category, long viewCount, String password, List<Comment> comments) {
     this.postId = postId;
