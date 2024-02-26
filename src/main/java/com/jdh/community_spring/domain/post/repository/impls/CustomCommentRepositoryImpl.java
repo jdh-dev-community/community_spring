@@ -106,7 +106,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     CommentStatusKey.match(result.get(comment.commentStatus.commentStatus))
             )).collect(Collectors.toList());
 
-    
+
     return new PageImpl<>(dtos, pageable, count);
   }
 
