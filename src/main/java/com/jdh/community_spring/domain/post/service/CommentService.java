@@ -4,8 +4,6 @@ import com.jdh.community_spring.common.dto.ListReqDto;
 import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 
-import java.util.List;
-
 public interface CommentService {
   CommentDto createComment(long postId, CommentCreateReqDto dto);
   ListResDto<CommentDto> getCommentList(long postId, ListReqDto dto);

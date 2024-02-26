@@ -44,6 +44,9 @@ public class CommentServiceImpl implements CommentService {
   private final InMemoryDBProvider inMemoryDBProvider;
 
 
+  // 자식 댓글의 자식에 대한 로직은 처리되지 않고 있음
+  // 대대댓글은 없다고 가정
+  @Override
   public ListResDto<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
     Pageable pageable = dto.toPageable();
     Page<Comment> comments = commentRepository.findAllByParentCommentId(commentId, pageable);
@@ -52,6 +55,7 @@ public class CommentServiceImpl implements CommentService {
     return new ListResDto<>(comments.getTotalElements(), commentDtos);
   }
 
+  @Override
   public ListResDto<CommentDto> getCommentList(long postId, ListReqDto dto) {
     Pageable pageable = dto.toPageable();
     Page<CommentDto> comments = commentRepository.findCommentsByPostId(postId, pageable);
