@@ -9,6 +9,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,12 +30,10 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
 
   private final JPAQueryFactory jpaQueryFactory;
   private final PathBuilder<Comment> entityPath;
-  private final QComment commentAlias;
 
   public CustomCommentRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
     this.jpaQueryFactory = jpaQueryFactory;
     this.entityPath = new PathBuilder<>(Comment.class, "comment");
-    this.commentAlias = new QComment("commentAlias");
   }
 
   @Override
@@ -53,10 +52,16 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
 
   @Override
   public Page<CommentDto> findCommentsByPostId(long postId, Pageable pageable) {
+    QComment childComment = new QComment("childComment");
 
-    BooleanExpression isActive = comment.commentStatus.commentStatus.eq("active");
-    BooleanExpression hasReplies = commentAlias.commentId.count().gt(0);
-    BooleanExpression isInactiveWithReplies = comment.commentStatus.commentStatus.ne("active").and(hasReplies);
+    JPQLQuery<Long> commentCountSubQuery = JPAExpressions
+            .select(childComment.count())
+            .from(childComment)
+            .where(
+                    comment.commentId.eq(childComment.parentComment.commentId),
+                    isValidComment(childComment)
+            );
+
 
     List<Tuple> comments = jpaQueryFactory
             .select(
@@ -64,32 +69,19 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     comment.content,
                     comment.creator,
                     comment.createdAt,
-                    commentAlias.commentId.count(),
+                    commentCountSubQuery,
                     comment.commentStatus.commentStatus
             ).from(comment)
             .leftJoin(comment.commentStatus)
-            .leftJoin(commentAlias)
-            .on(commentAlias.parentComment.commentId.eq(comment.commentId))
             .where(
                     comment.post.postId.eq(postId),
-                    comment.parentComment.isNull()
+                    comment.parentComment.isNull(),
+                    isValidComment(childComment)
             )
-            .groupBy(comment.commentId)
-            .having(isActive.or(isInactiveWithReplies))
             .orderBy(extractOrder(pageable.getSort(), entityPath))
             .limit(pageable.getPageSize())
             .offset(pageable.getOffset())
             .fetch();
-
-    BooleanExpression hasRepliesForCount = JPAExpressions
-            .selectOne()
-            .from(commentAlias)
-            .where(commentAlias.parentComment.commentId.eq(comment.commentId))
-            .exists();
-
-
-    BooleanExpression isInactiveWithRepliesForCount = comment.commentStatus.commentStatus.ne("active").and(hasRepliesForCount);
-
 
     Long count = jpaQueryFactory
             .select(comment.count())
@@ -98,7 +90,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
             .where(
                     comment.post.postId.eq(postId),
                     comment.parentComment.isNull(),
-                    isActive.or(isInactiveWithRepliesForCount)
+                    isValidComment(childComment)
             )
             .fetchOne();
 
@@ -109,14 +101,28 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     result.get(comment.content),
                     result.get(comment.creator),
                     result.get(comment.createdAt),
-                    result.get(commentAlias.commentId.count()),
+                    result.get(commentCountSubQuery),
                     postId,
                     CommentStatusKey.match(result.get(comment.commentStatus.commentStatus))
             )).collect(Collectors.toList());
 
-
+    
     return new PageImpl<>(dtos, pageable, count);
   }
 
+  private BooleanExpression isValidComment (QComment childComment) {
+    BooleanExpression isActive = comment.commentStatus.commentStatus.eq("active");
+
+    BooleanExpression hasReplies = JPAExpressions
+            .selectOne()
+            .from(childComment)
+            .where(childComment.parentComment.commentId.eq(comment.commentId))
+            .exists();
+
+    BooleanExpression isInactiveWithReplies = comment.commentStatus.commentStatus.ne("active")
+            .and(hasReplies);
+
+    return isActive.or(isInactiveWithReplies);
+  }
 
 }
