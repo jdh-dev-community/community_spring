@@ -1,6 +1,7 @@
 package com.jdh.community_spring.domain.post.dto;
 
 import com.jdh.community_spring.common.constant.PostCategory;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.domain.Post;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -36,12 +37,12 @@ public class PostCommentsDto {
   private long viewCount;
 
   @Schema(description = "게시글에 달린 댓글 목록", example = "댓글[]")
-  List<CommentDto> comments;
+  ListResDto<CommentDto> comments;
 
   @Schema(description = "게시글의 생성일자", example = "2023-01-01T12:00:00")
   private LocalDateTime createdAt;
 
-  public static PostCommentsDto of (Post post, List<CommentDto> comments) {
+  public static PostCommentsDto of (Post post, ListResDto<CommentDto> comments) {
     return PostCommentsDto.builder()
             .postId(post.getPostId())
             .title(post.getTitle())

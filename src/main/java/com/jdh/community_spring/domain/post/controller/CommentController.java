@@ -1,6 +1,7 @@
 package com.jdh.community_spring.domain.post.controller;
 
 import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,18 +39,18 @@ public class CommentController {
   @Operation(summary = "댓글 목록 조회", description = "최상위 댓글 목록을 조회합니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}/comment")
-  public List<CommentDto> getCommentList(
+  public ListResDto<CommentDto> getCommentList(
           @PathVariable("id") long postId,
           @Valid @ModelAttribute ListReqDto dto
   ) {
-    List<CommentDto> comments = commentService.getCommentList(postId, dto);
+    ListResDto<CommentDto> comments = commentService.getCommentList(postId, dto);
     return comments;
   }
 
   @Operation(summary = "대댓글 목록 조회", description = "대댓글 목록을 조회합니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}/comment/{commentId}")
-  public List<CommentDto> getChildComment(
+  public List<CommentDto> getChildCommentList(
           @PathVariable long commentId,
           @Valid @ModelAttribute ListReqDto dto
   ) {

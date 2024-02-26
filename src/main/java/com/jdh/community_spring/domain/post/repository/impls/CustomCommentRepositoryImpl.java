@@ -8,8 +8,11 @@ import com.jdh.community_spring.domain.post.repository.CustomCommentRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -26,10 +29,12 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
 
   private final JPAQueryFactory jpaQueryFactory;
   private final PathBuilder<Comment> entityPath;
+  private final QComment commentAlias;
 
   public CustomCommentRepositoryImpl(JPAQueryFactory jpaQueryFactory) {
     this.jpaQueryFactory = jpaQueryFactory;
     this.entityPath = new PathBuilder<>(Comment.class, "comment");
+    this.commentAlias = new QComment("commentAlias");
   }
 
   @Override
@@ -47,8 +52,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
   }
 
   @Override
-  public List<CommentDto> findCommentsByPostId(long postId, Pageable pageable) {
-    QComment commentAlias = new QComment("commentAlias");
+  public Page<CommentDto> findCommentsByPostId(long postId, Pageable pageable) {
 
     BooleanExpression isActive = comment.commentStatus.commentStatus.eq("active");
     BooleanExpression hasReplies = commentAlias.commentId.count().gt(0);
@@ -77,6 +81,27 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
             .offset(pageable.getOffset())
             .fetch();
 
+    BooleanExpression hasRepliesForCount = JPAExpressions
+            .selectOne()
+            .from(commentAlias)
+            .where(commentAlias.parentComment.commentId.eq(comment.commentId))
+            .exists();
+
+
+    BooleanExpression isInactiveWithRepliesForCount = comment.commentStatus.commentStatus.ne("active").and(hasRepliesForCount);
+
+
+    Long count = jpaQueryFactory
+            .select(comment.count())
+            .from(comment)
+            .leftJoin(comment.commentStatus)
+            .where(
+                    comment.post.postId.eq(postId),
+                    comment.parentComment.isNull(),
+                    isActive.or(isInactiveWithRepliesForCount)
+            )
+            .fetchOne();
+
 
     List<CommentDto> dtos = comments.stream()
             .map((result) -> CommentDto.of(
@@ -89,6 +114,9 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
                     CommentStatusKey.match(result.get(comment.commentStatus.commentStatus))
             )).collect(Collectors.toList());
 
-    return dtos;
+
+    return new PageImpl<>(dtos, pageable, count);
   }
+
+
 }
