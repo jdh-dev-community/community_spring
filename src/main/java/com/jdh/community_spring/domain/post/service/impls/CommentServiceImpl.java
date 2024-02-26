@@ -2,6 +2,7 @@ package com.jdh.community_spring.domain.post.service.impls;
 
 
 import com.jdh.community_spring.common.dto.ListReqDto;
+import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Comment;
@@ -43,19 +44,19 @@ public class CommentServiceImpl implements CommentService {
   private final InMemoryDBProvider inMemoryDBProvider;
 
 
-  public List<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
+  public ListResDto<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
     Pageable pageable = dto.toPageable();
     Page<Comment> comments = commentRepository.findAllByParentCommentId(commentId, pageable);
     List<CommentDto> commentDtos = comments.stream().map(CommentDto::from).collect(Collectors.toList());
 
-    return commentDtos;
+    return new ListResDto<>(comments.getTotalElements(), commentDtos);
   }
 
-  public List<CommentDto> getCommentList(long postId, ListReqDto dto) {
+  public ListResDto<CommentDto> getCommentList(long postId, ListReqDto dto) {
     Pageable pageable = dto.toPageable();
-    List<CommentDto> comments = commentRepository.findCommentsByPostId(postId, pageable);
+    Page<CommentDto> comments = commentRepository.findCommentsByPostId(postId, pageable);
 
-    return comments;
+    return new ListResDto<>(comments.getTotalElements(), comments.getContent());
   }
 
   @Override

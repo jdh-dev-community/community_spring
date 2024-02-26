@@ -55,8 +55,8 @@ public class PostServiceImpl implements PostService {
     post.updateViewCount();
     postRepository.save(post);
 
-    ListReqDto dto = ListReqDto.of(1, 3, SortBy.RECENT, OrderBy.DESC);
-    List<CommentDto> comments = commentService.getCommentList(postId, dto);
+    ListReqDto dto = ListReqDto.of(1, 10, SortBy.RECENT, OrderBy.DESC);
+    ListResDto<CommentDto> comments = commentService.getCommentList(postId, dto);
 
     return PostCommentsDto.of(post, comments);
   }
