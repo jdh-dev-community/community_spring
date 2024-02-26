@@ -50,11 +50,11 @@ public class CommentController {
   @Operation(summary = "대댓글 목록 조회", description = "대댓글 목록을 조회합니다.")
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/post/{id}/comment/{commentId}")
-  public List<CommentDto> getChildCommentList(
+  public ListResDto<CommentDto> getChildCommentList(
           @PathVariable long commentId,
           @Valid @ModelAttribute ListReqDto dto
   ) {
-    List<CommentDto> comments = commentService.getChildCommentList(commentId, dto);
+    ListResDto<CommentDto> comments = commentService.getChildCommentList(commentId, dto);
     return comments;
   }
 

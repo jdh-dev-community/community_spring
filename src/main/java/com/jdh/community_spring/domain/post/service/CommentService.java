@@ -9,7 +9,7 @@ import java.util.List;
 public interface CommentService {
   CommentDto createComment(long postId, CommentCreateReqDto dto);
   ListResDto<CommentDto> getCommentList(long postId, ListReqDto dto);
-  List<CommentDto> getChildCommentList(long commentId, ListReqDto dto);
+  ListResDto<CommentDto> getChildCommentList(long commentId, ListReqDto dto);
   TokenResDto generateToken(long commentId, TokenReqDto dto);
   CommentDto deleteComment(long commentId);
 

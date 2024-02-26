@@ -44,12 +44,12 @@ public class CommentServiceImpl implements CommentService {
   private final InMemoryDBProvider inMemoryDBProvider;
 
 
-  public List<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
+  public ListResDto<CommentDto> getChildCommentList(long commentId, ListReqDto dto) {
     Pageable pageable = dto.toPageable();
     Page<Comment> comments = commentRepository.findAllByParentCommentId(commentId, pageable);
     List<CommentDto> commentDtos = comments.stream().map(CommentDto::from).collect(Collectors.toList());
 
-    return commentDtos;
+    return new ListResDto<>(comments.getTotalElements(), commentDtos);
   }
 
   public ListResDto<CommentDto> getCommentList(long postId, ListReqDto dto) {
