@@ -36,7 +36,7 @@ public class PostCommentsDto {
   @NotNull(message = "조회수는 필수 입력 값입니다.")
   private long viewCount;
 
-  @Schema(description = "게시글에 달린 댓글 목록", example = "댓글[]")
+  @Schema(description = "게시글에 달린 댓글 목록", example = "{elementsCount: 4, content: 댓글[]}")
   ListResDto<CommentDto> comments;
 
   @Schema(description = "게시글의 생성일자", example = "2023-01-01T12:00:00")
