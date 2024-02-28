@@ -21,12 +21,12 @@ public class PostEditReqDto {
   @NotBlank(message = "내용은 필수 입력 값입니다.")
   private final String content;
 
-  @Schema(description = "게시글의 카테고리 (질문, 홍보, 상담)", example = "질문")
+  @Schema(description = "게시글의 카테고리 (질문, 홍보, 상담)", example = "question")
   @NotNull(message = "카테고리는 필수 입력 값입니다.")
   private final PostCategory category;
 
   @JsonCreator
-  public static PostEditReqDto of (String title, String content, String category, String creator) {
+  public static PostEditReqDto of (String title, String content, String category) {
     return PostEditReqDto.builder()
             .title(title)
             .content(content)
