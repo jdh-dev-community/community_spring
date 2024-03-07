@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,11 +62,7 @@ public class PostController {
   @Operation(
           summary = "게시글 수정",
           description = "게시글 수정 api 입니다.",
-          parameters = {
-                  @Parameter(name = "Authorization", required = true, in = ParameterIn.HEADER,
-                          description = "Bearer <token>", schema = @Schema(type = "string"))
-          }
-
+          security = { @SecurityRequirement(name = "bearerAuth") }
   )
   public PostCommentCountDto editPost(@PathVariable("id") long postId, @Valid @RequestBody PostEditReqDto dto) {
     PostCommentCountDto result = postService.editPost(postId, dto);
@@ -75,10 +72,7 @@ public class PostController {
   @Operation(
           summary = "게시글 삭제",
           description = "게시글 삭제 api 입니다.",
-          parameters = {
-                  @Parameter(name = "Authorization", required = true, in = ParameterIn.HEADER,
-                          description = "Bearer <token>", schema = @Schema(type = "string"))
-          }
+          security = { @SecurityRequirement(name = "bearerAuth") }
   )
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/post/{id}")
