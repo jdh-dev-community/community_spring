@@ -1,215 +1,337 @@
 package com.jdh.community_spring.domain.post.controller;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jdh.community_spring.common.exception.NotFoundException;
-import com.jdh.community_spring.common.dto.ListResDto;
-import com.jdh.community_spring.domain.post.service.PostService;
+import com.jdh.community_spring.common.constant.PostCategory;
+import com.jdh.community_spring.domain.post.domain.Post;
+import com.jdh.community_spring.domain.post.repository.PostRepository;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PostController.class)
+
+@SpringBootTest
+@AutoConfigureMockMvc
 public class PostControllerTest {
-  @Autowired
-  private ObjectMapper objectMapper;
 
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
-  private PostService postService;
+  @Autowired
+  private PostRepository postRepository;
 
+  @Autowired
+  private ObjectMapper objectMapper;
 
-  private final String baseUrl = "/api/v1";
+  private final String baseUrl = "/api/v1/post";
 
-  @DisplayName("게시글 생성")
   @Nested
-  class CreatePost {
-    private final String url = baseUrl + "/post";
+  class 게시글생성_테스트 {
 
-//    @Test
-//    public void 요청의_Body가_유효할경우_201응답() throws Exception {
-//      String requestBody = createDummyBody(null);
-//      int postId = 1;
-//      List<CommentResDto> list = new ArrayList<>();
-//      PostResDto resDto = new PostResDto(postId, "제목", "컨텐츠", "question", "작성자", 0, list, LocalDateTime.now());
-//      when(postService.createPost(any(PostCreateReqDto.class))).thenReturn(resDto);
-//
-//      postAndVerify(requestBody)
-//              .andExpect(status().isCreated())
-//              .andExpect(jsonPath("$.postId", Matchers.equalTo(postId)));
-//    }
+    private Map<String, String> defaultRequest;
+
+    @BeforeEach
+    public void setup() {
+      this.defaultRequest = Map.of(
+              "title", "제목",
+              "content", "it is contents",
+              "creator", "me",
+              "category", "question",
+              "password", "1234"
+      );
+    }
 
     @Test
-    public void 요청의_Body에_필수값이누락된경우_400을응답() throws Exception {
-      String requestBody = createDummyBody("title");
+    public void 요청_데이터가_유효한_경우_생성된_게시글과_201_응답을_반환() throws Exception {
+      Map<String, String> validRequest = defaultRequest;
+      String validBody = objectMapper.writeValueAsString(validRequest);
 
-      postAndVerify(requestBody)
-              .andExpect(status().isBadRequest())
-              .andExpect(jsonPath("$.path", Matchers.equalTo(url)))
-              .andExpect(jsonPath("$.httpStatus", Matchers.equalTo(HttpStatus.BAD_REQUEST.name())))
-              .andExpect(jsonPath("$.timestamp", Matchers.notNullValue()))
-              .andExpect(jsonPath("$.message", Matchers.notNullValue()));
+      postAndVerify(validBody)
+              .andExpect(status().isCreated())
+              .andExpect(jsonPath("$.title", Matchers.equalTo(validRequest.get("title"))));
+    }
+
+    @Test
+    public void 요청_데이터에_필수값이_누락된_경우_400_응답을_반환() throws Exception {
+      String requiredField = "title";
+      Map<String, String> invalidRequest = new HashMap<>(defaultRequest);
+      invalidRequest.remove(requiredField);
+      String invalidBody = objectMapper.writeValueAsString(invalidRequest);
+
+      postAndVerify(invalidBody).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void 요청_데이터가_유효하지_않은_경우_400_응답을_반환() throws Exception {
+      String invalidData = "It is an invalid data";
+      Map<String, String> invalidRequest = new HashMap<>(defaultRequest);
+      invalidRequest.put("category", invalidData);
+      String invalidBody = objectMapper.writeValueAsString(invalidRequest);
+
+      postAndVerify(invalidBody).andExpect(status().isBadRequest());
+
     }
 
     private ResultActions postAndVerify(String body) throws Exception {
-      return mockMvc.perform(post(url)
+      return mockMvc.perform(post(baseUrl)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(body));
-    }
-
-    private String createDummyBody(String deleteId) throws JsonProcessingException {
-
-      Map<String, String> dummy = new HashMap<>();
-      dummy.put("title", "제목");
-      dummy.put("content", "내용");
-      dummy.put("category", "question");
-      dummy.put("creator", "생성자");
-      dummy.put("password", "1234");
-
-      if (deleteId != null) dummy.remove(deleteId);
-      String json = objectMapper.writeValueAsString(dummy);
-
-      return json;
+              .content(body)
+      );
     }
   }
 
-  @DisplayName("게시글 목록 조회")
   @Nested
-  class GetPostList {
-    private final int TOTAL_COUNT = 50;
+  class 게시글상세_테스트 {
+    private long savedPostId;
 
-//    @Test
-//    public void 요청에_쿼리미함포시_기본값사용하여_성공응답반환() throws Exception {
-//      String url = baseUrl + "/post";
-//
-//      ListReqDto dto = new ListReqDto(1, 10, "createdAt", "desc");
-//      when(postService.getPostList(dto))
-//              .thenReturn(createDummy(dto.getSize(), TOTAL_COUNT));
-//
-//      mockMvc.perform(get(url))
-//              .andExpect(status().isOk())
-//              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
-//              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(dto.getSize())));
-//    }
+    @BeforeEach
+    public void setup() {
+      Post post = createPost(1);
+      Post savedPost = postRepository.save(post);
+      savedPostId = savedPost.getPostId();
+    }
 
-//    @Test
-//    public void 요청에_쿼리포함시_해당값사용하여_성공응답반환() throws Exception {
-//      int page = 2;
-//      int pageSize = 5;
-//      String sortBy = "createdAt";
-//      String orderBy = "desc";
-//
-//      String url = new StringBuilder(baseUrl + "/post")
-//              .append("?page=" + page)
-//              .append("&size=" + pageSize)
-//              .append("&sortBy=" + sortBy)
-//              .append("&orderBy=" + orderBy)
-//              .toString();
-//
-//      ListReqDto dto = new ListReqDto(page, pageSize, sortBy, orderBy);
-//      when(postService.getPostList(dto)).thenReturn(createDummy(pageSize, TOTAL_COUNT));
-//
-//      mockMvc.perform(get(url))
-//              .andExpect(status().isOk())
-//              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(TOTAL_COUNT)))
-//              .andExpect(jsonPath("$.content.length()", Matchers.lessThanOrEqualTo(pageSize)));
-//    }
+    @AfterEach
+    public void cleanup() {
+      postRepository.deleteAll();
+      savedPostId = 0;
+    }
 
-//    @Test
-//    public void 요청에_유효하지않은값이포함시_400응답반환() throws Exception {
-//      int invalidPage = 0;
-//      int invalidSize = 0;
-//
-//      String url = baseUrl + "/post?page=" + invalidPage + "&size=" + invalidSize;
-//
-//      mockMvc.perform(get(url))
-//              .andExpect(status().isBadRequest())
-//              .andExpect(jsonPath("$.path", Matchers.equalTo(baseUrl + "/post")))
-//              .andExpect(jsonPath("$.httpStatus", Matchers.equalTo(HttpStatus.BAD_REQUEST.name())))
-//              .andExpect(jsonPath("$.timestamp", Matchers.notNullValue()))
-//              .andExpect(jsonPath("$.message", Matchers.notNullValue()));
-//
-//    }
-//
-//    private ListResDto<PostResDto> createDummy(int size, int totalElements) {
-//      List<CommentResDto> dummyComments = new ArrayList<>();
-//      List<PostResDto> list = IntStream.rangeClosed(1, size)
-//              .mapToObj((i) -> new PostResDto(i, "제목" + i, "이건 더미 데이터", "테스트", "테스트", 0, dummyComments, LocalDateTime.now()))
-//              .collect(Collectors.toList());
-//
-//      return new ListResDto<>(totalElements, list);
-//    }
+    @Test
+    public void 게시글_id에_해당하는_게시글이_존재하는_경우_게시글과_200_응답() throws Exception {
+      String validId = String.valueOf(savedPostId);
+
+      mockMvc.perform(get(baseUrl + "/" + validId))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.postId", Matchers.equalTo(Integer.parseInt(validId))))
+              .andExpect(jsonPath("$.title").exists())
+              .andExpect(jsonPath("$.content").exists())
+              .andExpect(jsonPath("$.category").exists())
+              .andExpect(jsonPath("$.viewCount").exists())
+              .andExpect(jsonPath("$.comments").exists())
+              .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    public void 게시글_id에_해당하는_게시글이_존재하지_않는_경우_EntityNotFoundException_발생_404_응답() throws Exception {
+      String notMatchedId = String.valueOf(savedPostId + 1);
+
+      mockMvc.perform(get(baseUrl + "/" + notMatchedId))
+              .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void 게시글_id가_유효하지_않는_경우_400_응답() throws Exception {
+      String invalidId = "id";
+      mockMvc.perform(get(baseUrl + "/" + invalidId))
+              .andExpect(status().isBadRequest());
+    }
   }
 
-  @DisplayName("게시글 상세 조회")
   @Nested
-  class GetPost {
-    private final String url = baseUrl + "/post";
+  class 게시글목록_테스트 {
+    private final int LIST_COUNT = 40;
+
+    @BeforeEach
+    public void setup() {
+      List<Post> posts = IntStream.rangeClosed(1, LIST_COUNT)
+              .mapToObj((i) -> createPost(i))
+              .collect(Collectors.toList());
+
+      postRepository.saveAll(posts);
+    }
+
+    @AfterEach
+    public void cleanup() {
+      postRepository.deleteAll();
+    }
+
+    @Test
+    public void 목록조회_성공시_전체_게시글_개수와_페이지_사이즈_만큼의_목록을_반환하고_200_응답() throws Exception {
+      int pageSize = 3;
+
+      mockMvc.perform((get(baseUrl + "?size=" + pageSize)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(LIST_COUNT)))
+              .andExpect(jsonPath("$.content.size()", Matchers.equalTo(pageSize)))
+              .andExpect(jsonPath("$.content.[0].title").exists())
+              .andExpect(jsonPath("$.content.[0].content").exists())
+              .andExpect(jsonPath("$.content.[0].category").exists())
+              .andExpect(jsonPath("$.content.[0].creator").exists())
+              .andExpect(jsonPath("$.content.[0].viewCount").exists())
+              .andExpect(jsonPath("$.content.[0].commentCount").exists())
+              .andExpect(jsonPath("$.content.[0].createdAt").exists());
+    }
+
+    @Test
+    public void 해당_페이지에_데이터가_없는_경우_() throws Exception {
+      int page = 100000;
+
+      mockMvc.perform((get(baseUrl + "?page=" + page)))
+              .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(LIST_COUNT)))
+              .andExpect(jsonPath("$.content.size()", Matchers.equalTo(0)));
+    }
+
+    @Test
+    public void 페이지가_주어지지_않는_경우_1페이지를_기본으로_로딩하고_200_응답() throws Exception {
+      int DEFAULT_PAGE_NUMBER = 1;
+
+      MockHttpServletResponse responseWithPageNumber = mockMvc
+              .perform(get(baseUrl + "?page=" + DEFAULT_PAGE_NUMBER))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> expectedContentIds = extractIds(responseWithPageNumber);
 
 
-//    @Test
-//    public void 요청에_유효한id포함시_성공응답반환() throws Exception {
-//      long validId = 1;
-//
-//      when(postService.getPost(validId)).thenReturn(createDummyPost(validId));
-//
-//      mockMvc.perform(get(url + "/" + validId))
-//              .andExpect(status().isOk())
-//              .andExpect(jsonPath("$.postId", Matchers.equalTo(validId)));
-//    }
+      MockHttpServletResponse responseWithoutPageNumber = mockMvc
+              .perform(get(baseUrl))
+              .andReturn()
+              .getResponse();
 
-//    @Test
-//    public void 요청에_유효하지않은id포함시_400응답반환() throws Exception {
-//      String validId = "invalidId";
-//
-//      when(postService.getPost(Long.parseLong(validId))).thenThrow(IllegalArgumentException.class);
-//
-//      mockMvc.perform(get(url + "/" + validId))
-//              .andExpect(status().isBadRequest());
-//    }
+      List<Integer> contentIds = extractIds(responseWithoutPageNumber);
+      int status = responseWithoutPageNumber.getStatus();
 
-//    @Test
-//    public void 요청에_포함된id에_매칭되는게시글이없을시_404응답반환() throws Exception {
-//      String notMatchedId = "1000000";
-//
-//      when(postService.getPost(Long.parseLong(notMatchedId))).thenThrow(NotFoundException.class);
-//
-//      mockMvc.perform(get(url + "/" + notMatchedId))
-//              .andExpect(status().isNotFound());
-//    }
-//
-//
-//    private PostResDto createDummyPost(long postId) throws JsonProcessingException {
-//      List<CommentResDto> dummyComments = new ArrayList<>();
-//      PostResDto dto = new PostResDto(postId, "t", "t", "t", "2", 1, dummyComments, LocalDateTime.now());
-//      return dto;
-//    }
 
+      assertEquals(expectedContentIds, contentIds);
+      assertEquals(HttpStatus.OK.value(), status);
+    }
+
+    @Test
+    public void 페이지_사이즈가_주어지지_않는_경우_사이즈10을_기본으로_로딩하고_200_응답() throws Exception {
+      int DEFAULT_PAGE_SIZE = 10;
+
+      MockHttpServletResponse responseWithPageSize = mockMvc
+              .perform(get(baseUrl + "?size=" + DEFAULT_PAGE_SIZE))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> expectedContentIds = extractIds(responseWithPageSize);
+
+      MockHttpServletResponse responseWithoutPageSize = mockMvc
+              .perform(get(baseUrl))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> contentIds = extractIds(responseWithoutPageSize);
+      int status = responseWithoutPageSize.getStatus();
+
+      assertEquals(expectedContentIds, contentIds);
+      assertEquals(HttpStatus.OK.value(), status);
+    }
+
+    @Test
+    public void 정렬기준이_주어지지_않는_경우_최신순으로_정렬하고_200_응답() throws Exception {
+      String DEFAULT_SORT_BY = "recent";
+
+      MockHttpServletResponse responseWithSortBy = mockMvc
+              .perform(get(baseUrl + "?sortBy=" + DEFAULT_SORT_BY))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> expectedContentIds = extractIds(responseWithSortBy);
+
+      MockHttpServletResponse responseWithoutSortBy = mockMvc
+              .perform(get(baseUrl))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> contentIds = extractIds(responseWithoutSortBy);
+      int status = responseWithoutSortBy.getStatus();
+
+      assertEquals(expectedContentIds, contentIds);
+      assertEquals(HttpStatus.OK.value(), status);
+    }
+
+    @Test
+    public void 오름차순_내림차순이_별도로_주어지지_않은_경우_내림차순_정렬하고_200_응답() throws Exception {
+      String DEFAULT_ORDER_BY = "desc";
+
+      MockHttpServletResponse responseWithSortBy = mockMvc
+              .perform(get(baseUrl + "?orderBy=" + DEFAULT_ORDER_BY))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> expectedContentIds = extractIds(responseWithSortBy);
+
+      MockHttpServletResponse responseWithoutSortBy = mockMvc
+              .perform(get(baseUrl))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> contentIds = extractIds(responseWithoutSortBy);
+      int status = responseWithoutSortBy.getStatus();
+
+      assertEquals(expectedContentIds, contentIds);
+      assertEquals(HttpStatus.OK.value(), status);
+    }
+
+    @Test
+    public void 페이지_사이즈가_30개_이상인_경우_최대_30개까지만_반환하고_200_응답() throws Exception {
+      int MAX_PAGE_SIZE = 30;
+      int EXCEEDED_PAGE_SIZE = 60;
+
+      MockHttpServletResponse responseWithSortBy = mockMvc
+              .perform(get(baseUrl + "?size=" + MAX_PAGE_SIZE))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> expectedContentIds = extractIds(responseWithSortBy);
+
+      MockHttpServletResponse responseWithoutSortBy = mockMvc
+              .perform(get(baseUrl + "?size=" + EXCEEDED_PAGE_SIZE))
+              .andReturn()
+              .getResponse();
+
+      List<Integer> contentIds = extractIds(responseWithoutSortBy);
+      int status = responseWithoutSortBy.getStatus();
+
+      assertEquals(expectedContentIds, contentIds);
+      assertEquals(HttpStatus.OK.value(), status);
+    }
+
+    private List<Integer> extractIds(MockHttpServletResponse response) throws Exception {
+      JsonNode rootNode = objectMapper.readTree(response.getContentAsString());
+      JsonNode contentNodes = rootNode.path("content");
+
+      List<Integer> ids = new ArrayList<>();
+
+      for (JsonNode node: contentNodes) {
+        ids.add(node.path("postId").asInt());
+      }
+
+      return ids;
+    }
+
+  }
+
+  private Post createPost(Integer suffix) {
+    return Post.builder()
+            .title("제목" + suffix)
+            .textContent("content")
+            .category(PostCategory.AD)
+            .password("1234")
+            .creator("me")
+            .build();
   }
 }
+
 
 
