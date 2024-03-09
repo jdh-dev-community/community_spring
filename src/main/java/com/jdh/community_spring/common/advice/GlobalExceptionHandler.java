@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +44,12 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(OptimisticLockException.class)
   public @ResponseBody HttpErrorInfo handleOptimisticLockException(WebRequest req, OptimisticLockException ex) {
     return createHttpErrorInfo(BAD_REQUEST, req, ex);
+  }
+
+  @ResponseStatus(NOT_FOUND)
+  @ExceptionHandler(JpaObjectRetrievalFailureException.class)
+  public @ResponseBody HttpErrorInfo handleJpaObjectRetrievalFailureException(WebRequest req, JpaObjectRetrievalFailureException ex) {
+    return createHttpErrorInfo(NOT_FOUND, req, ex);
   }
 
   @ResponseStatus(NOT_FOUND)

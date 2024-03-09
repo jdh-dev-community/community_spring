@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class PostControllerTest {
   private final String baseUrl = "/api/v1/post";
   private final String dummyPassword = "1234";
@@ -53,7 +55,6 @@ public class PostControllerTest {
   @Autowired
   private InMemoryDBProvider inMemoryDBProvider;
 
-  @Autowired
   private MockMvc mockMvc;
 
   @BeforeEach
@@ -64,6 +65,7 @@ public class PostControllerTest {
             .addFilter(tokenFilter, baseUrl + "/*")
             .build();
   }
+
 
   @Nested
   class 게시글생성_테스트 {

@@ -43,7 +43,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository, CustomBas
             .fetchOne();
 
     if (selectedPost == null) {
-      new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다");
+      throw new EntityNotFoundException("[postId: " + postId + "] 게시글이 존재하지 않습니다");
     }
 
     return selectedPost;

@@ -29,7 +29,7 @@ public class CommentCreateReqDto {
   @Schema(description = "대댓글인 경우 부모 댓글의 id", example = "1234", nullable = true)
   private final Long parentId;
 
-  @Schema(description = "댓글의 상태 (active/inactive/blocked)", example = "1234", nullable = true)
+  @Schema(description = "댓글의 상태 (active/inactive/blocked)", example = "active", nullable = true)
   private final CommentStatusKey status = CommentStatusKey.ACTIVE;
 
   @Override
