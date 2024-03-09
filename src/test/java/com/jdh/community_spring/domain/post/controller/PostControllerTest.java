@@ -3,6 +3,9 @@ package com.jdh.community_spring.domain.post.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdh.community_spring.common.constant.PostCategory;
+import com.jdh.community_spring.common.filter.TokenFilter;
+import com.jdh.community_spring.common.provider.InMemoryDBProvider;
+import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
 import org.hamcrest.Matchers;
@@ -15,14 +18,16 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,9 +35,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PostControllerTest {
+  private final String baseUrl = "/api/v1/post";
+  private final String dummyPassword = "1234";
 
   @Autowired
-  private MockMvc mockMvc;
+  private SimpleEncrypt simpleEncrypt;
 
   @Autowired
   private PostRepository postRepository;
@@ -40,7 +47,23 @@ public class PostControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
-  private final String baseUrl = "/api/v1/post";
+  @Autowired
+  private WebApplicationContext context;
+
+  @Autowired
+  private InMemoryDBProvider inMemoryDBProvider;
+
+  @Autowired
+  private MockMvc mockMvc;
+
+  @BeforeEach
+  public void setup() {
+    TokenFilter tokenFilter = new TokenFilter(inMemoryDBProvider);
+    mockMvc = MockMvcBuilders
+            .webAppContextSetup(context)
+            .addFilter(tokenFilter, baseUrl + "/*")
+            .build();
+  }
 
   @Nested
   class 게시글생성_테스트 {
@@ -65,7 +88,15 @@ public class PostControllerTest {
 
       postAndVerify(validBody)
               .andExpect(status().isCreated())
-              .andExpect(jsonPath("$.title", Matchers.equalTo(validRequest.get("title"))));
+              .andExpect(jsonPath("$.postId").exists())
+              .andExpect(jsonPath("$.title", Matchers.equalTo(validRequest.get("title"))))
+              .andExpect(jsonPath("$.content", Matchers.equalTo(validRequest.get("content"))))
+              .andExpect(jsonPath("$.category", Matchers.equalTo(validRequest.get("category"))))
+              .andExpect(jsonPath("$.creator", Matchers.equalTo(validRequest.get("creator"))))
+              .andExpect(jsonPath("$.viewCount", Matchers.equalTo(0)))
+              .andExpect(jsonPath("$.commentCount", Matchers.equalTo(0)))
+              .andExpect(jsonPath("$.createdAt").exists())
+              .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test
@@ -103,7 +134,7 @@ public class PostControllerTest {
 
     @BeforeEach
     public void setup() {
-      Post post = createPost(1);
+      Post post = createPost("제목1");
       Post savedPost = postRepository.save(post);
       savedPostId = savedPost.getPostId();
     }
@@ -152,7 +183,7 @@ public class PostControllerTest {
     @BeforeEach
     public void setup() {
       List<Post> posts = IntStream.rangeClosed(1, LIST_COUNT)
-              .mapToObj((i) -> createPost(i))
+              .mapToObj((i) -> createPost("제목" + i))
               .collect(Collectors.toList());
 
       postRepository.saveAll(posts);
@@ -313,7 +344,7 @@ public class PostControllerTest {
 
       List<Integer> ids = new ArrayList<>();
 
-      for (JsonNode node: contentNodes) {
+      for (JsonNode node : contentNodes) {
         ids.add(node.path("postId").asInt());
       }
 
@@ -322,12 +353,168 @@ public class PostControllerTest {
 
   }
 
-  private Post createPost(Integer suffix) {
+  @Nested
+  class 게시글수정_테스트 {
+    private String authToken;
+    private Map<String, String> defaultRequest;
+    private Post savedPost;
+
+    @BeforeEach
+    public void setupRequest() {
+      defaultRequest = Map.of(
+              "title", "제목",
+              "content", "it is contents",
+              "category", "question"
+      );
+    }
+
+    @BeforeEach
+    public void setupPostAndToken() {
+      Post post = createPost("제목");
+      savedPost = postRepository.save(post);
+
+      authToken = simpleEncrypt.encrypt(dummyPassword);
+      inMemoryDBProvider.setTemperarily(savedPost.getPostId() + "", authToken, (long) 30);
+    }
+
+    @AfterEach
+    public void cleanup() {
+      postRepository.deleteAll();
+      savedPost = null;
+      authToken = "";
+    }
+
+    @Test
+    public void 요청_데이터가_유효한_경우_수정된_게시글과_200_응답() throws Exception {
+      long validPostId = savedPost.getPostId();
+      Map<String, String> validRequest = defaultRequest;
+      String validBody = objectMapper.writeValueAsString(validRequest);
+
+      mockMvc.perform(put(baseUrl + "/" + validPostId)
+                      .header("Authorization", "Bearer " + authToken)
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(validBody))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.postId", Matchers.equalTo((int) validPostId)))
+              .andExpect(jsonPath("$.title", Matchers.equalTo(validRequest.get("title"))))
+              .andExpect(jsonPath("$.content", Matchers.equalTo(validRequest.get("content"))))
+              .andExpect(jsonPath("$.category", Matchers.equalTo(validRequest.get("category"))))
+              .andExpect(jsonPath("$.creator", Matchers.equalTo(savedPost.getCreator())))
+              .andExpect(jsonPath("$.viewCount", Matchers.equalTo((int) savedPost.getViewCount())))
+              .andExpect(jsonPath("$.commentCount").exists())
+              .andExpect(jsonPath("$.createdAt").exists())
+              .andExpect(jsonPath("$.password").doesNotExist());
+
+      Post editedPost = postRepository.findByIdWithException(validPostId);
+      assertEquals(editedPost.getPostId(), validPostId);
+      assertEquals(editedPost.getTextContent(), validRequest.get("content"));
+      assertEquals(editedPost.getCategory(), validRequest.get("category"));
+    }
+
+    @Test
+    public void 요청에_인증_토큰이_없는_경우_403_응답() throws Exception {
+      long validPostId = savedPost.getPostId();
+      Map<String, String> validRequest = defaultRequest;
+      String validBody = objectMapper.writeValueAsString(validRequest);
+
+      mockMvc.perform(put(baseUrl + "/" + validPostId)
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(validBody))
+              .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void 요청의_게시글_id가_인증되지_않은_경우_403() throws Exception {
+      String notMatchedId = String.valueOf(savedPost.getPostId() + 1);
+      Map<String, String> validRequest = defaultRequest;
+      String validBody = objectMapper.writeValueAsString(validRequest);
+
+      mockMvc.perform(put(baseUrl + "/" + notMatchedId)
+              .header("Authorization", "Bearer " + authToken)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(validBody))
+              .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void 요청_데이터에_필수값이_누락된_경우_400_응답() throws Exception {
+      String requiredProps = "title";
+      Map<String, String> invalidRequest = new HashMap<>(defaultRequest);
+      invalidRequest.remove(requiredProps);
+      String invalidBody = objectMapper.writeValueAsString(invalidRequest);
+
+      mockMvc.perform(put(baseUrl + "/" + savedPost.getPostId())
+                      .header("Authorization", "Bearer " + authToken)
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(invalidBody))
+              .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void 요청_데이터가_유효하지_않은_경우_400_응답() throws Exception {
+      String invalidData = "It is an invalid data";
+      Map<String, String> invalidRequest = new HashMap<>(defaultRequest);
+      invalidRequest.put("category", invalidData);
+      String invalidBody = objectMapper.writeValueAsString(invalidRequest);
+
+      mockMvc.perform(put(baseUrl + "/" + savedPost.getPostId())
+                      .header("Authorization", "Bearer " + authToken)
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(invalidBody))
+              .andExpect(status().isBadRequest());
+    }
+  }
+
+  @Nested
+  class 게시글삭제_테스트 {
+
+    private String authToken;
+    private long savedPostId;
+
+    @BeforeEach
+    public void setup() {
+      Post post = createPost("제목");
+      Post savedPost = postRepository.save(post);
+      savedPostId = savedPost.getPostId();
+
+      authToken = simpleEncrypt.encrypt(dummyPassword);
+      inMemoryDBProvider.setTemperarily(savedPostId + "", authToken, (long) 30);
+    }
+
+    @AfterEach
+    public void cleanup() {
+      postRepository.deleteAll();
+      savedPostId = 0;
+    }
+
+    @Test
+    public void 요청이_유효한_경우_게시글_삭제_후_204_응답() throws Exception {
+      long validPostId = savedPostId;
+
+      mockMvc.perform(delete(baseUrl + "/" + validPostId)
+              .header("Authorization", "Bearer " + authToken))
+              .andExpect(status().isNoContent());
+
+      Optional<Post> deletedPost = postRepository.findById(validPostId);
+      assertThat(deletedPost).isEmpty();
+    }
+
+    @Test
+    public void 요청에_인증_토큰이_없는_경우_403_응답() throws Exception {
+      long validPostId = savedPostId;
+
+      mockMvc.perform(delete(baseUrl + "/" + validPostId))
+              .andExpect(status().isForbidden());
+    }
+
+  }
+
+  private Post createPost(String title) {
     return Post.builder()
-            .title("제목" + suffix)
+            .title(title)
             .textContent("content")
             .category(PostCategory.AD)
-            .password("1234")
+            .password(simpleEncrypt.encrypt(dummyPassword))
             .creator("me")
             .build();
   }
