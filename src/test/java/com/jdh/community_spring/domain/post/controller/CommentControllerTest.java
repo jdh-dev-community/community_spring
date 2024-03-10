@@ -13,6 +13,7 @@ import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.repository.CommentRepository;
 import com.jdh.community_spring.domain.post.repository.CommentStatusRepository;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
+import com.jdh.community_spring.utils.TestInitializer;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +28,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,8 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Testcontainers
 @ActiveProfiles("test")
-public class CommentControllerTest {
+public class CommentControllerTest extends TestInitializer {
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -60,10 +62,9 @@ public class CommentControllerTest {
   private CommentRepository commentRepository;
 
   @Autowired
-  private InMemoryDBProvider inMemoryDBProvider;
-
-  @Autowired
   private WebApplicationContext context;
+
+  private InMemoryDBProvider inMemoryDBProvider;
 
   private String baseUrl;
   private Post post;
@@ -75,6 +76,8 @@ public class CommentControllerTest {
 
   @BeforeEach
   public void setup() {
+    inMemoryDBProvider = initRedisProvider();
+
     activeStatus = commentStatusRepository.save(createCommentStatus(CommentStatusKey.ACTIVE));
     inactiveStatus = commentStatusRepository.save(createCommentStatus(CommentStatusKey.INACTIVE));
     post = postRepository.save(createPost("post"));
@@ -82,10 +85,7 @@ public class CommentControllerTest {
     baseUrl = "/api/v1/post/" + post.getPostId() + "/comment";
 
     TokenFilter tokenFilter = new TokenFilter(inMemoryDBProvider);
-    mockMvc = MockMvcBuilders
-            .webAppContextSetup(context)
-            .addFilter(tokenFilter, "/api/v1/post/*")
-            .build();
+    mockMvc = initMockMvc(context, tokenFilter, "/api/v1/post/*");
   }
 
   @AfterEach
@@ -707,4 +707,6 @@ public class CommentControllerTest {
             .creator("me")
             .build();
   }
+
+
 }

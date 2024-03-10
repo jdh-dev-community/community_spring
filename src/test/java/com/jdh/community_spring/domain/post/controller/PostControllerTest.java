@@ -8,6 +8,7 @@ import com.jdh.community_spring.common.provider.InMemoryDBProvider;
 import com.jdh.community_spring.common.util.SimpleEncrypt;
 import com.jdh.community_spring.domain.post.domain.Post;
 import com.jdh.community_spring.domain.post.repository.PostRepository;
+import com.jdh.community_spring.utils.TestInitializer;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,10 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Testcontainers
 @ActiveProfiles("test")
-public class PostControllerTest {
-  private final String baseUrl = "/api/v1/post";
-  private final String dummyPassword = "1234";
+public class PostControllerTest extends TestInitializer {
 
   @Autowired
   private SimpleEncrypt simpleEncrypt;
@@ -52,18 +52,20 @@ public class PostControllerTest {
   @Autowired
   private WebApplicationContext context;
 
-  @Autowired
   private InMemoryDBProvider inMemoryDBProvider;
 
   private MockMvc mockMvc;
 
+  private final String baseUrl = "/api/v1/post";
+
+  private final String dummyPassword = "1234";
+
   @BeforeEach
   public void setup() {
+    inMemoryDBProvider = initRedisProvider();
+
     TokenFilter tokenFilter = new TokenFilter(inMemoryDBProvider);
-    mockMvc = MockMvcBuilders
-            .webAppContextSetup(context)
-            .addFilter(tokenFilter, baseUrl + "/*")
-            .build();
+    mockMvc = initMockMvc(context, tokenFilter, baseUrl + "/*");
   }
 
 
