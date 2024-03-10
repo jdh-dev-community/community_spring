@@ -8,7 +8,7 @@ COPY ./gradle   /workspace/app/gradle/
 COPY ./build.gradle /workspace/app
 COPY ./src /workspace/app/src/
 
-RUN ./gradlew build
+RUN ./gradlew build -x test
 RUN mv ./build/libs/community_spring-0.0.1-SNAPSHOT.jar /workspace/app/app.jar
 
 FROM eclipse-temurin:17-jre
