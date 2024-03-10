@@ -428,7 +428,7 @@ public class PostControllerTest {
 
     @Test
     public void 요청의_게시글_id가_인증되지_않은_경우_403() throws Exception {
-      String notMatchedId = String.valueOf(savedPost.getPostId() + 1);
+      String notMatchedId = String.valueOf(savedPost.getPostId() + 1000);
       Map<String, String> validRequest = defaultRequest;
       String validBody = objectMapper.writeValueAsString(validRequest);
 
