@@ -67,7 +67,6 @@ public class CommentServiceImpl implements CommentService {
   public CommentDto createComment(long postId, CommentCreateReqDto dto) {
     try {
       Post post = postRepository.findByIdWithException(postId);
-
       Comment parentComment = dto.getParentId() != null
               ? commentRepository.findByIdWithException(dto.getParentId())
               : null;

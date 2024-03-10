@@ -44,7 +44,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository, Cus
             .fetchOne();
 
     if (selectedComment == null) {
-      new EntityNotFoundException("[commentId: " + commentId + "] 댓글이 존재하지 않습니다");
+      throw new EntityNotFoundException("[commentId: " + commentId + "] 댓글이 존재하지 않습니다");
     }
 
     return selectedComment;

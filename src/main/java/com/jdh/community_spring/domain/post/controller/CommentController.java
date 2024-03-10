@@ -5,16 +5,13 @@ import com.jdh.community_spring.common.dto.ListResDto;
 import com.jdh.community_spring.domain.post.dto.*;
 import com.jdh.community_spring.domain.post.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -72,14 +69,11 @@ public class CommentController {
   @Operation(
           summary = "댓글 삭제",
           description = "댓글 삭제 api 입니다.",
-          parameters = {
-                  @Parameter(name = "Authorization", required = true, in = ParameterIn.HEADER,
-                          description = "Bearer <token>", schema = @Schema(type = "string"))
-          }
+          security = { @SecurityRequirement(name = "bearerAuth") }
   )
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/post/{id}/comment/{commentId}")
-  public CommentDto deletePost(@PathVariable long commentId) {
+  public CommentDto deleteComment(@PathVariable long commentId) {
     CommentDto result = commentService.deleteComment(commentId);
     return result;
   }
