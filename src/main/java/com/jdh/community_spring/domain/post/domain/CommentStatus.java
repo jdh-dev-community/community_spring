@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import javax.persistence.*;
 
@@ -22,7 +23,7 @@ public class CommentStatus extends BaseEntity {
   private long commentStatusId;
 
   @Schema(description = "상태 (활성화, 비활성화, 신고 등등)", example = "active")
-  @Column(name = "comment_status", nullable = false)
+  @Column(name = "comment_status", nullable = false, unique = true)
   private String commentStatus;
 
   @Builder

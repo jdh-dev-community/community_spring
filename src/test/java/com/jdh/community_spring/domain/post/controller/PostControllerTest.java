@@ -204,6 +204,7 @@ public class PostControllerTest {
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.elementsCount", Matchers.equalTo(LIST_COUNT)))
               .andExpect(jsonPath("$.content.size()", Matchers.equalTo(pageSize)))
+              .andExpect(jsonPath("$.content.[0].postId").exists())
               .andExpect(jsonPath("$.content.[0].title").exists())
               .andExpect(jsonPath("$.content.[0].content").exists())
               .andExpect(jsonPath("$.content.[0].category").exists())
@@ -231,7 +232,7 @@ public class PostControllerTest {
               .andReturn()
               .getResponse();
 
-      List<Integer> expectedContentIds = extractIds(responseWithPageNumber);
+      List<Long> expectedContentIds = extractIds(responseWithPageNumber);
 
 
       MockHttpServletResponse responseWithoutPageNumber = mockMvc
@@ -239,7 +240,7 @@ public class PostControllerTest {
               .andReturn()
               .getResponse();
 
-      List<Integer> contentIds = extractIds(responseWithoutPageNumber);
+      List<Long> contentIds = extractIds(responseWithoutPageNumber);
       int status = responseWithoutPageNumber.getStatus();
 
 
@@ -256,14 +257,14 @@ public class PostControllerTest {
               .andReturn()
               .getResponse();
 
-      List<Integer> expectedContentIds = extractIds(responseWithPageSize);
+      List<Long> expectedContentIds = extractIds(responseWithPageSize);
 
       MockHttpServletResponse responseWithoutPageSize = mockMvc
               .perform(get(baseUrl))
               .andReturn()
               .getResponse();
 
-      List<Integer> contentIds = extractIds(responseWithoutPageSize);
+      List<Long> contentIds = extractIds(responseWithoutPageSize);
       int status = responseWithoutPageSize.getStatus();
 
       assertEquals(expectedContentIds, contentIds);
@@ -279,14 +280,14 @@ public class PostControllerTest {
               .andReturn()
               .getResponse();
 
-      List<Integer> expectedContentIds = extractIds(responseWithSortBy);
+      List<Long> expectedContentIds = extractIds(responseWithSortBy);
 
       MockHttpServletResponse responseWithoutSortBy = mockMvc
               .perform(get(baseUrl))
               .andReturn()
               .getResponse();
 
-      List<Integer> contentIds = extractIds(responseWithoutSortBy);
+      List<Long> contentIds = extractIds(responseWithoutSortBy);
       int status = responseWithoutSortBy.getStatus();
 
       assertEquals(expectedContentIds, contentIds);
@@ -302,14 +303,14 @@ public class PostControllerTest {
               .andReturn()
               .getResponse();
 
-      List<Integer> expectedContentIds = extractIds(responseWithSortBy);
+      List<Long> expectedContentIds = extractIds(responseWithSortBy);
 
       MockHttpServletResponse responseWithoutSortBy = mockMvc
               .perform(get(baseUrl))
               .andReturn()
               .getResponse();
 
-      List<Integer> contentIds = extractIds(responseWithoutSortBy);
+      List<Long> contentIds = extractIds(responseWithoutSortBy);
       int status = responseWithoutSortBy.getStatus();
 
       assertEquals(expectedContentIds, contentIds);
@@ -326,28 +327,28 @@ public class PostControllerTest {
               .andReturn()
               .getResponse();
 
-      List<Integer> expectedContentIds = extractIds(responseWithSortBy);
+      List<Long> expectedContentIds = extractIds(responseWithSortBy);
 
       MockHttpServletResponse responseWithoutSortBy = mockMvc
               .perform(get(baseUrl + "?size=" + EXCEEDED_PAGE_SIZE))
               .andReturn()
               .getResponse();
 
-      List<Integer> contentIds = extractIds(responseWithoutSortBy);
+      List<Long> contentIds = extractIds(responseWithoutSortBy);
       int status = responseWithoutSortBy.getStatus();
 
       assertEquals(expectedContentIds, contentIds);
       assertEquals(HttpStatus.OK.value(), status);
     }
 
-    private List<Integer> extractIds(MockHttpServletResponse response) throws Exception {
+    private List<Long> extractIds(MockHttpServletResponse response) throws Exception {
       JsonNode rootNode = objectMapper.readTree(response.getContentAsString());
       JsonNode contentNodes = rootNode.path("content");
 
-      List<Integer> ids = new ArrayList<>();
+      List<Long> ids = new ArrayList<>();
 
       for (JsonNode node : contentNodes) {
-        ids.add(node.path("postId").asInt());
+        ids.add(node.path("postId").asLong());
       }
 
       return ids;
